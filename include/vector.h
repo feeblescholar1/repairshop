@@ -8,20 +8,27 @@
  */
 #ifndef REPAIRSHOP_VECTOR_H
 #define REPAIRSHOP_VECTOR_H
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdbool.h>
-        //#include "external/debugmalloc.h"
+
 #include "errorcodes.h"
+ /*#include "external/debugmalloc.h"*/
+
+#define index size_t
+
 struct vector {
         void **items;
         size_t size;
 };
+
 struct vector *v_init(void);
+bool vint_bounds_check(const struct vector *vec, index pos);
 int v_push_back(struct vector *vec, void *data);
-int v_insert(struct vector *vec, void *data, size_t pos);
-void *v_get_item_ptr(const struct vector *vec, size_t pos);
+int v_insert(struct vector *vec, void *data, index pos);
+void *v_get_item_ptr(const struct vector *vec, index pos);
 int v_pop_back(struct vector *vec);
-int v_rm(struct vector *vec, size_t pos);
+int v_rm(struct vector *vec, index pos);
 int v_del(struct vector *vec);
 #endif //REPAIRSHOP_VECTOR_H

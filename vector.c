@@ -3,7 +3,9 @@
  * Description: Generic vector implementation. Contains the function definitions
  *              found in 'vector.h'.
  */
+
 #include "include/vector.h"
+
 /*
  * Initializes a vector and return its pointer.
  * This does NOT initialize the array itself.
@@ -12,8 +14,10 @@
 struct vector *v_init(void)
 {
         struct vector *new = calloc(1, sizeof(struct vector));
+
         if (new == NULL)
                 return ERR_MALLOC_NULL;
+
         new->items = NULL;
         new->size = 0;
         return new;
@@ -29,18 +33,22 @@ int v_push_back(struct vector *vec, void *data)
 {
         if (vec == NULL || data == NULL)
                 return ERR_INV_PARAM;
+
+        /* vec->items is NULL, we have to allocate it */
         if (vec->size == 0) {
                 vec->items = calloc(1, sizeof(void*));
                 if (vec->items == NULL) {
-                        return ERR_MALLOC;
+                        return ERR_CALLOC;
                 }
                 vec->items[0] = data;
                 vec->size++;
                 return 0;
         }
+
         void **tmp = realloc(vec->items, (vec->size + 1) * sizeof(void*));
         if (tmp == NULL)
                 return ERR_REALLOC;
+
         vec->items = tmp;
         vec->items[vec->size] = data;
         vec->size++;
@@ -48,12 +56,12 @@ int v_push_back(struct vector *vec, void *data)
 }
 
 /*
- * Checks if a given position is out of range.
+ * Checks if a given position is in vec->items.
  * For internal use only.
  */
-bool vint_oob_check(const struct vector *vec, size_t pos)
+inline bool vint_bounds_check(const struct vector *vec, const index pos)
 {
-        return (vec->size < pos);
+        return (pos < vec->size);
 }
 
 /*
@@ -63,22 +71,29 @@ bool vint_oob_check(const struct vector *vec, size_t pos)
  * The given pointer must be allocated by the caller.
  * Returns 0 on success and an error code on failure.
  */
-int v_insert(struct vector *vec, void *data, size_t pos)
+int v_insert(struct vector *vec, void *data, index pos)
 {
-        if (vec == NULL || data == NULL)
+        if (!vec || !data)
                 return ERR_INV_PARAM;
-        if (vint_oob_check(vec, pos))
+
+        if (!vint_bounds_check(vec, pos))
                 return ERR_OUT_OF_RANGE;
+
         if (pos == vec->size)
                 return v_push_back(vec, data);
+
         void **tmp = realloc(vec->items, (vec->size + 1) * sizeof(void*));
-        if (tmp == NULL)
+        if (!tmp)
                 return ERR_REALLOC;
+
         vec->items = tmp;
         vec->size++;
-        for (size_t i = vec->size; i >= pos; i--) {
+
+        /* Shift the others to the right to make space at items[index]. */
+        for (index i = vec->size; i >= pos; i--) {
                 vec->items[i] = vec->items[i - 1];
         }
+
         vec->items[pos] = data;
         return 0;
 }
@@ -88,10 +103,11 @@ int v_insert(struct vector *vec, void *data, size_t pos)
  * Useful for obtaining subvectors.
  * The given pointer must not be freed. Use v_rm() for that.
  */
-void *v_get_item_ptr(const struct vector *vec, size_t pos)
+void *v_get_item_ptr(const struct vector *vec, index pos)
 {
-        if (vint_oob_check(vec, pos))
+        if (!vint_bounds_check(vec, pos))
                 return NULL;
+
         return vec->items[pos];
 }
 
@@ -102,18 +118,23 @@ void *v_get_item_ptr(const struct vector *vec, size_t pos)
  */
 int v_pop_back(struct vector *vec)
 {
-        if (vec == NULL)
+        if (!vec)
                 return ERR_INV_PARAM;
+
         free(vec->items[vec->size - 1]);
         vec->size--;
+
+        /* No items left, free the vector. */
         if (vec->size == 0) {
                 free(vec->items);
                 free(vec);
                 return 0;
         }
+
         void **tmp = realloc(vec->items, (vec->size + 1) * sizeof(void*));
         if (tmp == NULL)
                 return ERR_REALLOC;
+
         vec->items = tmp;
         return 0;
 }
@@ -123,26 +144,33 @@ int v_pop_back(struct vector *vec)
  * The allocated memory block is also freed.
  * Returns 0 on success and an error code on failure.
  */
-int v_rm(struct vector *vec, size_t pos)
+int v_rm(struct vector *vec, index pos)
 {
         if (vec == NULL)
                 return ERR_INV_PARAM;
-        if (vint_oob_check(vec, pos))
+
+        if (!vint_bounds_check(vec, pos))
                 return ERR_OUT_OF_RANGE;
+
         free(vec->items[pos]);
-        vec->size--; // reduce the size first to avoid shifting in OOB values
+        /* reduce the size first to avoid shifting in OOB values later */
+        vec->size--;
+
+        /* we don't have any items left, free the vector*/
         if (vec->size == 0) {
                 free(vec->items);
                 free(vec);
                 return 0;
         }
-        // this does not overindex because the realloc hasn't been made yet
-        for (size_t i = pos; i < vec->size; i++) {
+        /* this is not buffer overflow because the resizing hasn't been made yet*/
+        for (index i = pos; i < vec->size; i++) {
                 vec->items[i] = vec->items[i + 1];
         }
+
         void **tmp = realloc(vec->items, (vec->size + 1) * sizeof(void*));
         if (tmp == NULL)
                 return ERR_REALLOC;
+
         vec->items = tmp;
         return 0;
 }
@@ -155,13 +183,21 @@ int v_del(struct vector *vec)
 {
         if (vec == NULL)
                 return ERR_INV_PARAM;
+
         if (vec->size == 0){
                 free(vec);
                 return 0;
         }
-        for (size_t i = (vec->size - 1); i > 0; i--) {
+
+        /*
+         * We free everyone except items[0].
+         * The reason behind this is we iterate with size_t to avoid
+         * implementation defined behaviour.
+         */
+        for (index i = (vec->size - 1); i > 0; i--) {
                 free(vec->items[i]);
         }
+
         free(vec->items[0]);
         free(vec->items);
         free(vec);
