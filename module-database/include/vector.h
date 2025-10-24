@@ -1,8 +1,5 @@
 /*
- * File: vector.h
- * Description: Vector definition and function declarations for the generic
- *              vector found in 'vector.c'. Include 'external/debugmalloc.h' for
- *              dynamic memory analysis.
+ * vector.h - generic vector struct definition, can be debugged with debugmalloc.h
  * Note: debugmalloc.h is an external header file not maintained by this project.
  *       Source: https://infoc.eet.bme.hu/debugmalloc/debugmalloc.h
  */
@@ -13,8 +10,8 @@
 #include <stdio.h>
 #include <stdbool.h>
 
-#include "errorcodes.h"
- /*#include "external/debugmalloc.h"*/
+#include "../../include/errorcodes.h"
+//#include "../../include/external/debugmalloc.h"
 
 #define index size_t
 

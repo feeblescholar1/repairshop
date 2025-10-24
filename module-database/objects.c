@@ -1,6 +1,5 @@
 /*
- * File: objects.c
- * Description: Wrapper definitions found in 'objects.h'.
+ * objects.c - vector wrappers for managing clients, cars and operations
  */
 
 #include "include/objects.h"

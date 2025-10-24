@@ -1,8 +1,5 @@
 /*
- * File: objects.h
- * Description: Objects definitions for the primary data structure. Wrapper
- *              declarations and its dependencies for those objects are also
- *              found here.
+ * objects.h - object definitions for the primary data structure
  */
 #ifndef REPAIRSHOP_OBJECTS_H
 #define REPAIRSHOP_OBJECTS_H
@@ -14,7 +11,7 @@
 #include "vector.h"
 
 #define NAME_MAX_LEN 100
-#define EMAIL_MAX_LEN 30
+#define EMAIL_MAX_LEN 50
 #define PLATE_MAX_LEN 15
 #define DESCRIPTION_MAX_LEN 100
 #define PHONENUM_MAX_LEN 20

@@ -10,5 +10,4 @@
 #define ERR_OUT_OF_RANGE 1
 #define ERR_CALLOC 2
 #define ERR_REALLOC 3
-
 #endif //REPAIRSHOP_ERRORCODES_H

@@ -1,3 +1,7 @@
+/*
+ * database.h - defines database structure, include this to use the project database.
+ */
+
 #ifndef REPAIRSHOP_DATABASE_H
 #define REPAIRSHOP_DATABASE_H
 
@@ -22,6 +26,7 @@ struct car *db_get_car(const struct database *db, index client, index car);
 struct operation *db_get_op(const struct database *db, index client,
         index car, index op);
 int db_rm_client(const struct database *db, index pos);
-int db_car_rm(const struct database *db, index client, index car);
+int db_rm_car(const struct database *db, index client, index car);
 int db_rm_op(const struct database *db, index client, index car, index op);
+int db_del(struct database *db);
 #endif //REPAIRSHOP_DATABASE_H

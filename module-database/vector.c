@@ -1,7 +1,5 @@
 /*
- * File: vector.c
- * Description: Generic vector implementation. Contains the function definitions
- *              found in 'vector.h'.
+ * vector.c - generic vector implementation
  */
 
 #include "include/vector.h"
