@@ -118,9 +118,7 @@ int client_remove(struct vector *parent, const index pos)
                 car_remove(client, 0);
         }
 
-        /* The client has 0 cars, but has vector initialized.*/
-        if (client_cars == 0)
-                v_del(client->cars);
+        v_del(client->cars);
 
         return v_rm(parent, pos);
 }

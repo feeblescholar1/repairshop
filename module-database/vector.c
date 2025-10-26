@@ -157,7 +157,6 @@ int v_rm(struct vector *vec, index pos)
         /* we don't have any items left, free the vector*/
         if (vec->size == 0) {
                 free(vec->items);
-                free(vec);
                 return 0;
         }
         /* this is not buffer overflow because the resizing hasn't been made yet*/

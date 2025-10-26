@@ -173,15 +173,12 @@ int db_del(struct database *db)
         if (!db)
                 return ERR_INV_PARAM;
 
-        if (db->clients->size == 0) {
-                free(db->clients);
-                free(db);
-                return 0;
-        }
         const size_t client_num = db->clients->size;
         for (index client_i = 0; client_i < client_num; client_i++) {
                 db_rm_client(db, 0);
         }
+
+        v_del(db->clients);
         free(db);
         return 0;
 }
