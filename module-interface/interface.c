@@ -26,7 +26,7 @@ int mainloop(struct database *db)
                                 mainloop_active = false;
                                 break;
                         case 1:
-                                subinterface_client(db);
+                                interface_client(db);
                                 break;
                         default:
                                 printf("Nincs ilyen opcio. \n");

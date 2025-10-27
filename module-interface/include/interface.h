@@ -5,7 +5,7 @@
 #define REPAIRSHOP_INTERFACE_H
 
 #include "interface_io_tools.h"
-#include "subinterface_client.h"
+#include "interface_client.h"
 
 void text_mainloop();
 int mainloop(struct database *db);

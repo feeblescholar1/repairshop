@@ -11,7 +11,7 @@
 #include <stdbool.h>
 
 #include "../../include/errorcodes.h"
-//#include "../../include/external/debugmalloc.h"
+#include "../../include/external/debugmalloc.h"
 
 #define index size_t
 

@@ -6,10 +6,11 @@
 #include "../../include/errorcodes.h"
 #include "../../module-database/include/database.h"
 #include "interface_io_tools.h"
+#include "interface_car_op.h"
 
-void subinterface_client_text(struct database *db);
-int subinterface_client(struct database *db);
-int subinterface_client_add(struct database *db);
-int subinterface_client_rm(struct database *db);
+void interface_client_text(const struct database *db);
+int interface_client(const struct database *db);
+int interface_client_add(const struct database *db);
+int interface_client_rm(const struct database *db, index client_i);
 
 #endif //REPAIRSHOP_SUBINTERFACE_CLIENT_H
