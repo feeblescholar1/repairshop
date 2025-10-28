@@ -122,10 +122,9 @@ int v_pop_back(struct vector *vec)
         free(vec->items[vec->size - 1]);
         vec->size--;
 
-        /* No items left, free the vector. */
+        /* no items left, free the pointer array. */
         if (vec->size == 0) {
                 free(vec->items);
-                free(vec);
                 return 0;
         }
 
@@ -154,12 +153,12 @@ int v_rm(struct vector *vec, index pos)
         /* reduce the size first to avoid shifting in OOB values later */
         vec->size--;
 
-        /* we don't have any items left, free the vector*/
+        /* no items left, free the pointer array. */
         if (vec->size == 0) {
                 free(vec->items);
                 return 0;
         }
-        /* this is not buffer overflow because the resizing hasn't been made yet*/
+        /* this is not buffer overflow because the resizing hasn't been made yet */
         for (index i = pos; i < vec->size; i++) {
                 vec->items[i] = vec->items[i + 1];
         }
