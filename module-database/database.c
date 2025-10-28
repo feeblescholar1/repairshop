@@ -1,5 +1,5 @@
 /*
- * database.c - primary data structure function
+ * database.c - main data structure function definitions
  */
 
 #include "include/database.h"
@@ -16,7 +16,7 @@ struct database *db_init(const char *name, const char *desc)
 
         struct database *db = calloc(1, sizeof(struct database));
         if (db == NULL)
-                return ERR_MALLOC_NULL;
+                return ERR_CALLOC_NULL;
 
         strcpy(db->name, name);
         strcpy(db->desc, desc);
@@ -97,6 +97,7 @@ struct client *db_get_client(const struct database *db, const index client)
         return v_get_item_ptr(db->clients, client);
 }
 
+
 /*
  * Returns a car object pointer from a database at the given index.
  * Returns NULL on failure.
@@ -112,7 +113,7 @@ struct car *db_get_car(const struct database *db, const index client,
 }
 
 /*
- * Returns a operation object pointer from a database at the given index.
+ * Returns an operation object pointer from a database at the given index.
  * Returns NULL on failure.
  */
 struct operation *db_get_op(const struct database *db, const index client,
@@ -123,6 +124,73 @@ struct operation *db_get_op(const struct database *db, const index client,
                 return NULL;
 
         return v_get_item_ptr(car_->operations, op);
+}
+
+/*
+ * Modifies a client's data at the given index.
+ * This function does parameter validation.
+ * Returns 0 on success and an error code on failure.
+ */
+int db_modify_client(const struct database *db, const index client_i,
+        const char *new_name, const char *new_email, const char *new_phone)
+{
+        if (!db)
+                return ERR_INV_PARAM;
+
+        if (strlen(new_name) > NAME_MAX_LEN + 1 ||
+        strlen(new_email) > EMAIL_MAX_LEN + 1 ||
+        strlen(new_phone) > PHONENUM_MAX_LEN + 1)
+                return ERR_INV_PARAM;
+
+        struct client *client = db_get_client(db, client_i);
+        if (!client)
+                return ERR_OUT_OF_RANGE;
+
+        return client_modify(client, new_name, new_email, new_phone);
+}
+
+/*
+ * Modifies a car's data at the given index.
+ * This function does parameter validation.
+ * Returns 0 on success and an error code on failure.
+ */
+int db_modify_car(const struct database *db, const index client_i,
+        const index car_i, const char *new_name, const char *new_plate)
+{
+        if (!db)
+                return ERR_INV_PARAM;
+
+        if (strlen(new_name) > NAME_MAX_LEN + 1 ||
+        strlen(new_plate) > PLATE_MAX_LEN + 1)
+                return ERR_INV_PARAM;
+
+        struct car *car = db_get_car(db, client_i, car_i);
+        if (!car)
+                return ERR_OUT_OF_RANGE;
+
+        return car_modify(car, new_name, new_plate);
+}
+
+/*
+ * Modifies an operation's data at the given index.
+ * This function does parameter validation.
+ * Returns 0 on success and an error code on failure.
+ */
+int db_modify_op(const struct database *db, const index client_i,
+        const index car_i, const index op_i, const char *new_desc,
+        const double new_price, const struct tm *new_date)
+{
+        if (!db)
+                return ERR_INV_PARAM;
+
+        if (strlen(new_desc) > NAME_MAX_LEN + 1)
+                return ERR_INV_PARAM;
+
+        struct operation *op = db_get_op(db, client_i, car_i, op_i);
+        if (!op)
+                return ERR_OUT_OF_RANGE;
+
+        return op_modify(op, new_desc, new_price, new_date);
 }
 
 /*

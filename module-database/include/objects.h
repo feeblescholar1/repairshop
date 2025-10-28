@@ -1,6 +1,7 @@
 /*
  * objects.h - object definitions for the primary data structure
  */
+
 #ifndef REPAIRSHOP_OBJECTS_H
 #define REPAIRSHOP_OBJECTS_H
 
@@ -41,6 +42,14 @@ int car_create(const struct client *parent, const char *name,
         const char *plate);
 int op_create(const struct car *parent, const char *desc, double price,
         const struct tm *date);
+
+int client_modify(struct client *client, const char *new_name,
+        const char *new_email, const char *new_phone);
+int car_modify(struct car *car, const char *new_name,
+        const char *new_plate);
+int op_modify(struct operation *op, const char *new_desc, double new_price,
+        const struct tm *date);
+
 int op_remove(const struct car *parent, index pos);
 int car_remove(const struct client *parent, index pos);
 int client_remove(struct vector *parent, index pos);

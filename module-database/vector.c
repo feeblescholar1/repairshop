@@ -14,7 +14,7 @@ struct vector *v_init(void)
         struct vector *new = calloc(1, sizeof(struct vector));
 
         if (new == NULL)
-                return ERR_MALLOC_NULL;
+                return ERR_CALLOC_NULL;
 
         new->items = NULL;
         new->size = 0;

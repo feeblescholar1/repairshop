@@ -29,7 +29,7 @@ int client_create(struct vector *parent, const char *name, const char *email,
 /*
  * Allocates and fills a car struct and links it to its given client struct.
  * String length validation is done by the caller.
- * Return 0 on success and an error code on failure.
+ * Returns 0 on success and an error code on failure.
  */
 int car_create(const struct client *parent, const char *name,
         const char *plate)
@@ -51,7 +51,7 @@ int car_create(const struct client *parent, const char *name,
  * Allocates and fills an operation struct and links it to its given car struct.
  * String length validation is done by the caller.
  * Pass NULL to date for the current date.
- * Return 0 on success and an error code on failure.
+ * Returns 0 on success and an error code on failure.
  */
 int op_create(const struct car *parent, const char *desc, const double price,
         const struct tm *date)
@@ -76,6 +76,77 @@ int op_create(const struct car *parent, const char *desc, const double price,
 
         return v_push_back(parent->operations, op);
 }
+
+/*
+ * Modifies a client's data.
+ * Pass NULL to a parameter to keep the original value.
+ * String length validation is done by the caller.
+ * Returns 0 on success and an error code on failure.
+ */
+int client_modify(struct client *client, const char *new_name,
+        const char *new_email, const char *new_phone)
+{
+        if (!client)
+                return ERR_INV_PARAM;
+
+        if (new_name)
+                strcpy(client->name, new_name);
+
+        if (new_email)
+                strcpy(client->email, new_email);
+
+        if (new_phone)
+                strcpy(client->phone, new_phone);
+
+        return 0;
+}
+
+/*
+ * Modifies a car's data.
+ * Pass NULL to a parameter to keep the original value.
+ * String length validation is done by the caller.
+ * Returns 0 on success and an error code on failure.
+ */
+int car_modify(struct car *car, const char *new_name,
+        const char *new_plate)
+{
+        if (!car)
+                return ERR_INV_PARAM;
+
+        if (new_name)
+                strcpy(car->name, new_name);
+
+        if (new_plate)
+                strcpy(car->plate, new_plate);
+
+        return 0;
+}
+
+/*
+ * Modifies an operation's data.
+ * Pass NULL to a parameter to keep the original value.
+ * String length validation is done by the caller.
+ * Returns 0 on success and an error code on failure.
+ */
+int op_modify(struct operation *op, const char *new_desc, const double new_price,
+        const struct tm *date)
+{
+        if (!op)
+                return ERR_INV_PARAM;
+
+        if (new_desc)
+                strcpy(op->desc, new_desc);
+
+        if (new_price)
+                op->price = new_price;
+
+        if (date)
+                op->date = date;
+
+        return 0;
+
+}
+
 
 /*
  * Removes an operation struct at the given pos in a car struct.
