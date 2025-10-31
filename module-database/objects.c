@@ -79,7 +79,6 @@ int op_create(const struct car *parent, const char *desc, const double price,
 
 /*
  * Modifies a client's data.
- * Pass NULL to a parameter to keep the original value.
  * String length validation is done by the caller.
  * Returns 0 on success and an error code on failure.
  */
@@ -89,21 +88,15 @@ int client_modify(struct client *client, const char *new_name,
         if (!client)
                 return ERR_INV_PARAM;
 
-        if (new_name)
-                strcpy(client->name, new_name);
-
-        if (new_email)
-                strcpy(client->email, new_email);
-
-        if (new_phone)
-                strcpy(client->phone, new_phone);
+        strcpy(client->name, new_name);
+        strcpy(client->email, new_email);
+        strcpy(client->phone, new_phone);
 
         return 0;
 }
 
 /*
  * Modifies a car's data.
- * Pass NULL to a parameter to keep the original value.
  * String length validation is done by the caller.
  * Returns 0 on success and an error code on failure.
  */
@@ -113,18 +106,14 @@ int car_modify(struct car *car, const char *new_name,
         if (!car)
                 return ERR_INV_PARAM;
 
-        if (new_name)
-                strcpy(car->name, new_name);
-
-        if (new_plate)
-                strcpy(car->plate, new_plate);
+        strcpy(car->name, new_name);
+        strcpy(car->plate, new_plate);
 
         return 0;
 }
 
 /*
  * Modifies an operation's data.
- * Pass NULL to a parameter to keep the original value.
  * String length validation is done by the caller.
  * Returns 0 on success and an error code on failure.
  */
@@ -134,17 +123,16 @@ int op_modify(struct operation *op, const char *new_desc, const double new_price
         if (!op)
                 return ERR_INV_PARAM;
 
-        if (new_desc)
-                strcpy(op->desc, new_desc);
-
-        if (new_price)
-                op->price = new_price;
-
+        strcpy(op->desc, new_desc);
+        op->price = new_price;
         if (date)
                 op->date = date;
+        else {
+                time_t t = time(NULL);
+                op->date = localtime(&t);
+        }
 
         return 0;
-
 }
 
 

@@ -6,8 +6,14 @@
 
 void interface_car_op_text(const struct database *db, index client_i);
 int interface_car_op(const struct database *db, index client_i);
+
 int interface_car_add(const struct database *db, index client_i);
 int interface_op_add(const struct database *db, index client_i, index car_i);
+
+int interface_car_modify(const struct database *db, index client_i, index car_i);
+int interface_op_modify(const struct database *db, index client_i, index car_i,
+        index op_i);
+
 int interface_car_rm(const struct database *db, index client_i, index car_i);
 int interface_op_rm(const struct database *db, index client_i, index car_i,
         index op_i);

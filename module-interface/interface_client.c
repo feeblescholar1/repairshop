@@ -8,8 +8,9 @@ void interface_client_text(const struct database *db)
         printf("\n------------------ Ugyfelek kezelese ------------------\n");
         printf("[0] Vissza\n");
         printf("[1] Ugyfel hozzadasa\n");
-        printf("[2] Ugyfel eltavolitasa\n");
-        printf("[3] Ugyfel autoinak es szerviztortenetenek lekerdezese\n");
+        printf("[2] Ugyfel adatainak modositasa\n");
+        printf("[3] Ugyfel eltavolitasa\n");
+        printf("[4] Ugyfel autoinak es szerviztortenetenek lekerdezese\n");
         printf("-------------------------------------------------------\n\n");
 
         if (db->clients->size == 0) {
@@ -49,11 +50,20 @@ int interface_client(const struct database *db)
                                 printf("Ugyfelazonosito: ");
                                 opt = interface_io_get_opt();
 
+                                response = interface_client_modify(db, opt);
+                                if (response == ERR_OUT_OF_RANGE)
+                                        printf("\nAz ugyfel nem talalhato.\n");
+                                break;
+
+                        case 3:
+                                printf("Ugyfelazonosito: ");
+                                opt = interface_io_get_opt();
+
                                 response = interface_client_rm(db, opt);
                                 if (response == ERR_OUT_OF_RANGE)
                                         printf("\nAz ugyfel nem talalhato.\n");
                                 break;
-                        case 3:
+                        case 4:
                                 printf("Ugyfelzonosito: ");
                                 opt = interface_io_get_opt();
 
@@ -72,9 +82,9 @@ int interface_client(const struct database *db)
 }
 int interface_client_add(const struct database *db)
 {
-        char name_buf[NAME_MAX_LEN + 1];
-        char email_buf[EMAIL_MAX_LEN + 1];
-        char phone_buf[PHONENUM_MAX_LEN + 1];
+        char name_buf[NAME_MAX_LEN + 1] = "\0";
+        char email_buf[EMAIL_MAX_LEN + 1] = "\0";
+        char phone_buf[PHONENUM_MAX_LEN + 1] = "\0";
 
         printf("Ugyfel neve (max. %d karakter): ", NAME_MAX_LEN);
         interface_io_fgets_clean(name_buf, NAME_MAX_LEN + 1);
@@ -88,6 +98,27 @@ int interface_client_add(const struct database *db)
         return db_add_client(db, name_buf, email_buf, phone_buf);
 }
 
+int interface_client_modify(const struct database *db, const index client_i)
+{
+        char name_buf[NAME_MAX_LEN + 1] = "\0";
+        char email_buf[EMAIL_MAX_LEN + 1] = "\0";
+        char phone_buf[PHONENUM_MAX_LEN + 1] = "\0";
+
+        printf("Ugyfel uj neve (max. %d karakter): ",
+                NAME_MAX_LEN);
+        interface_io_fgets_clean(name_buf, NAME_MAX_LEN + 1);
+
+        printf("Ugyfel uj email cime (max. %d karater): ",
+                EMAIL_MAX_LEN);
+        interface_io_fgets_clean(email_buf, EMAIL_MAX_LEN + 1);
+
+        printf("Ugyfel uj telefonszama (max. %d karakter): ",
+                PHONENUM_MAX_LEN);
+        interface_io_fgets_clean(phone_buf, PHONENUM_MAX_LEN + 1);
+
+
+        return db_modify_client(db, client_i, name_buf, email_buf, phone_buf);
+}
 int interface_client_rm(const struct database *db, const index client_i)
 {
         return client_remove(db->clients, client_i);
