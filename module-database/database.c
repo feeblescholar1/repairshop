@@ -73,7 +73,7 @@ int db_add_car(const struct database *db, const index client,
  * Returns 0 on success and an error code on failure.
  */
 int db_add_op(const struct database *db, const index client, const index car,
-        const char *desc, const double price, const struct tm *date)
+        const char *desc, const double price, const char *date)
 {
         if (!db)
                 return ERR_INV_PARAM;
@@ -178,7 +178,7 @@ int db_modify_car(const struct database *db, const index client_i,
  */
 int db_modify_op(const struct database *db, const index client_i,
         const index car_i, const index op_i, const char *new_desc,
-        const double new_price, const struct tm *new_date)
+        const double new_price, const char *new_date)
 {
         if (!db)
                 return ERR_INV_PARAM;

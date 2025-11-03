@@ -21,7 +21,7 @@ int db_add_client(const struct database *db, const char *name,
 int db_add_car(const struct database *db, index client,
         const char *name, const char *plate);
 int db_add_op(const struct database *db, index client, index car,
-        const char *desc, double price, const struct tm *date);
+        const char *desc, double price, const char *date);
 
 struct client *db_get_client(const struct database *db, index client);
 struct car *db_get_car(const struct database *db, index client, index car);
@@ -34,7 +34,7 @@ int db_modify_car(const struct database *db, index client_i,
         index car_i, const char *new_name, const char *new_plate);
 int db_modify_op(const struct database *db, index client_i, index car_i,
         index op_i, const char *new_desc, double new_price,
-        const struct tm *new_date);
+        const char *new_date);
 
 int db_rm_client(const struct database *db, index pos);
 int db_rm_car(const struct database *db, index client, index car);

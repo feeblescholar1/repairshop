@@ -10,6 +10,7 @@
 #include <stdlib.h>
 
 #include "vector.h"
+#include "date.h"
 
 #define NAME_MAX_LEN 100
 #define EMAIL_MAX_LEN 50
@@ -33,7 +34,7 @@ struct car {
 struct operation {
         char desc[DESCRIPTION_MAX_LEN + 1];
         double price;
-        const struct tm *date;
+        struct date date;
 };
 
 int client_create(struct vector *parent, const char *name, const char *email,
@@ -41,14 +42,14 @@ int client_create(struct vector *parent, const char *name, const char *email,
 int car_create(const struct client *parent, const char *name,
         const char *plate);
 int op_create(const struct car *parent, const char *desc, double price,
-        const struct tm *date);
+        const char *date);
 
 int client_modify(struct client *client, const char *new_name,
         const char *new_email, const char *new_phone);
 int car_modify(struct car *car, const char *new_name,
         const char *new_plate);
 int op_modify(struct operation *op, const char *new_desc, double new_price,
-        const struct tm *date);
+        const char *date);
 
 int op_remove(const struct car *parent, index pos);
 int car_remove(const struct client *parent, index pos);

@@ -26,8 +26,12 @@ void interface_car_op_text(const struct database *db, const index client_i)
                         for (index op_i = 0; op_i < car->operations->size; op_i++) {
                                 struct operation *op = db_get_op(db, client_i,
                                         car_i, op_i);
-                                printf("\t\t[Javitas][%lu][%s][%.2f][%s]\n", op_i,
-                                        op->desc, op->price, asctime(op->date));
+
+                                char date_str[17];
+                                date_printf(&op->date, date_str);
+
+                                printf("\t\t[%lu][%s][%.2f][%s]\n", op_i,
+                                        op->desc, op->price, date_str);
                         }
                 }
         }

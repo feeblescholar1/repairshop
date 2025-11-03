@@ -54,7 +54,7 @@ int car_create(const struct client *parent, const char *name,
  * Returns 0 on success and an error code on failure.
  */
 int op_create(const struct car *parent, const char *desc, const double price,
-        const struct tm *date)
+        const char *date)
 {
         if (!parent)
                 return ERR_INV_PARAM;
@@ -66,13 +66,10 @@ int op_create(const struct car *parent, const char *desc, const double price,
         strcpy(op->desc, desc);
         op->price = price;
 
-        if (!date) {
-                const time_t now = time(NULL);
-                op->date = localtime(&now);
-        }
-        else {
-                op->date = date;
-        }
+        if (!date)
+                op->date = date_now();
+        else
+                op->date = date_parse(date);
 
         return v_push_back(parent->operations, op);
 }
@@ -118,18 +115,17 @@ int car_modify(struct car *car, const char *new_name,
  * Returns 0 on success and an error code on failure.
  */
 int op_modify(struct operation *op, const char *new_desc, const double new_price,
-        const struct tm *date)
+        const char *date)
 {
         if (!op)
                 return ERR_INV_PARAM;
 
         strcpy(op->desc, new_desc);
         op->price = new_price;
-        if (date)
-                op->date = date;
+        if (!date)
+                op->date = date_now();
         else {
-                time_t t = time(NULL);
-                op->date = localtime(&t);
+                op->date = date_parse(date);
         }
 
         return 0;
