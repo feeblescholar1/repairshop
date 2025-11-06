@@ -1,6 +1,6 @@
 #include "include/date.h"
 
-struct date date_now()
+struct date date_now(void)
 {
         const time_t now = time(NULL);
         const struct tm *src = localtime(&now);

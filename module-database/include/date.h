@@ -8,7 +8,7 @@ struct date {
         int y, mon, d, h, min;
 };
 
-struct date date_now();
+struct date date_now(void);
 struct date date_parse(const char *str);
 void date_printf(const struct date *date, char *dst);
 
