@@ -10,36 +10,34 @@
  */
 struct database *db_init(const char *name, const char *desc)
 {
-        if (strlen(name) > NAME_MAX_LEN + 1 ||
-                strlen(desc) > DESCRIPTION_MAX_LEN + 1)
+        if (strlen(name) > NAME_SIZE + 1 || strlen(desc) > DESC_SIZE + 1)
                 return NULL;
 
-        struct database *db = calloc(1, sizeof(struct database));
-        if (db == NULL)
-                return ERR_CALLOC_NULL;
+        struct database *db = malloc(sizeof(struct database));
+        if (!db)
+                return EMEMNULL;
 
         strcpy(db->name, name);
         strcpy(db->desc, desc);
-        db->clients = v_init();
+        db->cl = vct();
         return db;
 }
 
 /*
  * Creates a client object and links it to a database.
  * This function validates its parameters.
- * Returns 0 on success and an error code on failure.
  */
-int db_add_client(const struct database *db, const char *name,
-        const char *email, const char *phone)
+int db_cl_add(const struct database *db, const char *name, const char *email,
+        const char *phone)
 {
         if (!db)
-                return ERR_INV_PARAM;
+                return EINV;
 
-        if (strlen(name) > NAME_MAX_LEN + 1 || strlen(email) > EMAIL_MAX_LEN + 1
-                || strlen(phone) > PHONENUM_MAX_LEN + 1)
-                return ERR_INV_PARAM;
+        if (strlen(name) > NAME_SIZE + 1 || strlen(email) > EMAIL_SIZE + 1
+                || strlen(phone) > PHNUM_SIZE + 1)
+                return EINV;
 
-        return client_create(db->clients, name, email, phone);
+        return obj_cl(db->cl, name, email, phone);
 }
 
 /*
@@ -47,22 +45,21 @@ int db_add_client(const struct database *db, const char *name,
  * Car objects can only be linked to an existing client.
  * Throws an error if the client does not exist at the given index.
  * This function validates its parameters.
- * Returns 0 on success and an error code on failure.
  */
-int db_add_car(const struct database *db, const index client,
-        const char *name, const char *plate)
+int db_car_add(const struct database *db, idx cl, const char *name,
+        const char *plate)
 {
         if (!db)
-                return ERR_INV_PARAM;
+                return EINV;
 
-        if (strlen(name) > NAME_MAX_LEN + 1 || strlen(plate) > PLATE_MAX_LEN + 1)
-                return ERR_INV_PARAM;
+        if (strlen(name) > NAME_SIZE + 1 || strlen(plate) > PLATE_SIZE + 1)
+                return EINV;
 
-        const struct client *client_ = v_get_item_ptr(db->clients, client);
+        const struct client *client_ = vct_subptr(db->cl, cl);
         if (client_ == NULL)
-                return ERR_OUT_OF_RANGE;
+                return EOOB;
 
-        return car_create(client_, name, plate);
+        return obj_car(client_, name, plate);
 }
 
 /*
@@ -70,31 +67,30 @@ int db_add_car(const struct database *db, const index client,
  * Operation objects can only be linked to an existing car object.
  * Throws an error if the client or the car does not exist at the given index.
  * This function validates its parameters.
- * Returns 0 on success and an error code on failure.
  */
-int db_add_op(const struct database *db, const index client, const index car,
-        const char *desc, const double price, const char *date)
+int db_op_add(const struct database *db, idx cl, idx car,
+        const char *desc, double price, const char *date)
 {
         if (!db)
-                return ERR_INV_PARAM;
+                return EINV;
 
-        if (strlen(desc) > DESCRIPTION_MAX_LEN)
-                return ERR_INV_PARAM;
+        if (strlen(desc) > DESC_SIZE)
+                return EINV;
 
-        const struct car *car_ = db_get_car(db, client, car);
+        const struct car *car_ = db_car_get(db, cl, car);
         if (!car_)
-                return ERR_OUT_OF_RANGE;
+                return EOOB;
 
-        return op_create(car_, desc, price, date);
+        return obj_op(car_, desc, price, date);
 }
 
 /*
  * Returns a client object pointer from a database at the given index.
  * Returns NULL on failure.
  */
-struct client *db_get_client(const struct database *db, const index client)
+struct client *db_cl_get(const struct database *db, idx cl)
 {
-        return v_get_item_ptr(db->clients, client);
+        return vct_subptr(db->cl, cl);
 }
 
 
@@ -102,134 +98,110 @@ struct client *db_get_client(const struct database *db, const index client)
  * Returns a car object pointer from a database at the given index.
  * Returns NULL on failure.
  */
-struct car *db_get_car(const struct database *db, const index client,
-        const index car)
+struct car *db_car_get(const struct database *db, idx cl, idx car)
 {
-        const struct client *client_ = db_get_client(db, client);
+        const struct client *client_ = db_cl_get(db, cl);
         if (!client_)
                 return NULL;
 
-        return v_get_item_ptr(client_->cars, car);
+        return vct_subptr(client_->cars, car);
 }
 
 /*
  * Returns an operation object pointer from a database at the given index.
  * Returns NULL on failure.
  */
-struct operation *db_get_op(const struct database *db, const index client,
-        const index car, const index op)
+struct operation *db_op_get(const struct database *db, idx cl, idx car, idx op)
 {
-        const struct car *car_ = db_get_car(db, client, car);
+        const struct car *car_ = db_car_get(db, cl, car);
         if (!car_)
                 return NULL;
 
-        return v_get_item_ptr(car_->operations, op);
+        return vct_subptr(car_->operations, op);
 }
 
-/*
- * Modifies a client's data at the given index.
- * This function does parameter validation.
- * Returns 0 on success and an error code on failure.
- */
-int db_modify_client(const struct database *db, const index client_i,
-        const char *new_name, const char *new_email, const char *new_phone)
+/* Modifies a client's data at the given index. */
+int db_cl_mod(const struct database *db, idx cl, const char *name,
+        const char *email, const char *phone)
 {
         if (!db)
-                return ERR_INV_PARAM;
+                return EINV;
 
-        if (strlen(new_name) > NAME_MAX_LEN + 1 ||
-        strlen(new_email) > EMAIL_MAX_LEN + 1 ||
-        strlen(new_phone) > PHONENUM_MAX_LEN + 1)
-                return ERR_INV_PARAM;
+        if (strlen(name) > NAME_SIZE + 1 || strlen(email) > EMAIL_SIZE + 1 ||
+                strlen(phone) > PHNUM_SIZE + 1)
+                return EINV;
 
-        struct client *client = db_get_client(db, client_i);
+        struct client *client = db_cl_get(db, cl);
         if (!client)
-                return ERR_OUT_OF_RANGE;
+                return EOOB;
 
-        return client_modify(client, new_name, new_email, new_phone);
+        return obj_cl_mod(client, name, email, phone);
 }
 
-/*
- * Modifies a car's data at the given index.
- * This function does parameter validation.
- * Returns 0 on success and an error code on failure.
- */
-int db_modify_car(const struct database *db, const index client_i,
-        const index car_i, const char *new_name, const char *new_plate)
+/* Modifies a car's data at the given index. */
+int db_car_mod(const struct database *db, idx cl, idx car, const char *name,
+        const char *plate)
 {
         if (!db)
-                return ERR_INV_PARAM;
+                return EINV;
 
-        if (strlen(new_name) > NAME_MAX_LEN + 1 ||
-        strlen(new_plate) > PLATE_MAX_LEN + 1)
-                return ERR_INV_PARAM;
+        if (strlen(name) > NAME_SIZE + 1 || strlen(plate) > PLATE_SIZE + 1)
+                return EINV;
 
-        struct car *car = db_get_car(db, client_i, car_i);
-        if (!car)
-                return ERR_OUT_OF_RANGE;
+        struct car *car_ = db_car_get(db, cl, car);
+        if (!car_)
+                return EOOB;
 
-        return car_modify(car, new_name, new_plate);
+        return obj_car_mod(car_, name, plate);
 }
 
-/*
- * Modifies an operation's data at the given index.
- * This function does parameter validation.
- * Returns 0 on success and an error code on failure.
- */
-int db_modify_op(const struct database *db, const index client_i,
-        const index car_i, const index op_i, const char *new_desc,
-        const double new_price, const char *new_date)
+/* Modifies an operation's data at the given index. */
+int db_op_mod(const struct database *db, idx cl, idx car, idx op,
+        const char *new_desc, double new_price, const char *new_date)
 {
         if (!db)
-                return ERR_INV_PARAM;
+                return EINV;
 
-        if (strlen(new_desc) > NAME_MAX_LEN + 1)
-                return ERR_INV_PARAM;
+        if (strlen(new_desc) > NAME_SIZE + 1)
+                return EINV;
 
-        struct operation *op = db_get_op(db, client_i, car_i, op_i);
-        if (!op)
-                return ERR_OUT_OF_RANGE;
+        struct operation *tmp = db_op_get(db, cl, car, op);
+        if (!tmp)
+                return EOOB;
 
-        return op_modify(op, new_desc, new_price, new_date);
+        return obj_mod(tmp, new_desc, new_price, new_date);
 }
 
-/*
- * Removes a client from a database at the given index.
- * The client object will be deallocated.
- * Returns 0 on success and an error code on failure.
- */
-int db_rm_client(const struct database *db, const index pos)
+/* Removes a client from a database at the given index. */
+int db_cl_rm(const struct database *db, idx cl)
 {
-        return client_remove(db->clients, pos);
+        return obj_cl_rm(db->cl, cl);
 }
 
 /*
  * Removes a car from a database at the given index.
  * The car object will be deallocated.
- * Returns 0 on success and an error code on failure.
  */
-int db_rm_car(const struct database *db, const index client, const index car)
+int db_car_rm(const struct database *db, idx cl, idx car)
 {
-        const struct client *client_ = db_get_client(db, client);
+        const struct client *client_ = db_cl_get(db, cl);
         if (!client_)
-                return ERR_OUT_OF_RANGE;
+                return EOOB;
 
-        return car_remove(client_, car);
+        return obj_car_rm(client_, car);
 }
 
 /*
  * Removes an operation from a database at the given index.
  * The operation object will be deallocated.
- * Returns 0 on success and an error code on failure.
  */
-int db_rm_op(const struct database *db, const index client, const index car,
-        const index op)
+int db_op_rm(const struct database *db, idx cl, idx car, idx op)
 {
-        const struct car *car_ = db_get_car(db, client, car);
+        struct car *car_ = db_car_get(db, cl, car);
         if (!car_)
-                return ERR_OUT_OF_RANGE;
+                return EOOB;
 
-        return op_remove(car_, op);
+        return obj_op_rm(car_, op);
 }
 
 /*
@@ -239,14 +211,14 @@ int db_rm_op(const struct database *db, const index client, const index car,
 int db_del(struct database *db)
 {
         if (!db)
-                return ERR_INV_PARAM;
+                return EINV;
 
-        const size_t client_num = db->clients->size;
-        for (index client_i = 0; client_i < client_num; client_i++) {
-                db_rm_client(db, 0);
+        const size_t cl_size = db->cl->size;
+        for (idx cl = 0; cl < cl_size; cl++) {
+                db_cl_rm(db, 0);
         }
 
-        v_del(db->clients);
+        vct_del(db->cl);
         free(db);
         return 0;
 }

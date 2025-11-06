@@ -9,12 +9,12 @@
  * This does NOT initialize the array itself.
  * Returns NULL on failure.
  */
-struct vector *v_init(void)
+struct vector *vct(void)
 {
-        struct vector *new = calloc(1, sizeof(struct vector));
+        struct vector *new = malloc(sizeof(struct vector));
 
-        if (new == NULL)
-                return ERR_CALLOC_NULL;
+        if (!new)
+                return EMEMNULL;
 
         new->items = NULL;
         new->size = 0;
@@ -25,31 +25,30 @@ struct vector *v_init(void)
  * Appends a pointer to the vector.
  * The given pointer must be allocated by the caller.
  * Use this function to initialize vec->items.
- * Returns 0 on success and an error code on failure.
  */
-int v_push_back(struct vector *vec, void *data)
+int vct_push(struct vector *v, void *data)
 {
-        if (vec == NULL || data == NULL)
-                return ERR_INV_PARAM;
+        if (!v || !data)
+                return EINV;
 
         /* vec->items is NULL, we have to allocate it */
-        if (vec->size == 0) {
-                vec->items = calloc(1, sizeof(void*));
-                if (vec->items == NULL) {
-                        return ERR_CALLOC;
+        if (v->size == 0) {
+                v->items = malloc(sizeof(void*));
+                if (!v->items) {
+                        return EMALLOC;
                 }
-                vec->items[0] = data;
-                vec->size++;
+                v->items[0] = data;
+                v->size++;
                 return 0;
         }
 
-        void **tmp = realloc(vec->items, (vec->size + 1) * sizeof(void*));
+        void **tmp = realloc(v->items, (v->size + 1) * sizeof(void*));
         if (tmp == NULL)
-                return ERR_REALLOC;
+                return EREALLOC;
 
-        vec->items = tmp;
-        vec->items[vec->size] = data;
-        vec->size++;
+        v->items = tmp;
+        v->items[v->size] = data;
+        v->size++;
         return 0;
 }
 
@@ -57,117 +56,114 @@ int v_push_back(struct vector *vec, void *data)
  * Checks if a given position is in vec->items.
  * For internal use only.
  */
-inline bool vint_bounds_check(const struct vector *vec, const index pos)
+inline bool inbounds(const struct vector *v, idx pos)
 {
-        return (pos < vec->size);
+        return (pos < v->size);
 }
 
 /*
  * Insert a given pointer to the array into the given position.
  * Indexing starts from 0.
- * Unlike v_push_back() this function CANNOT initialize vec–>items.
+ * Unlike vector_push() this function CANNOT initialize vec–>items.
  * The given pointer must be allocated by the caller.
- * Returns 0 on success and an error code on failure.
  */
-int v_insert(struct vector *vec, void *data, index pos)
+int vct_insert(struct vector *v, void *data, idx pos)
 {
-        if (!vec || !data)
-                return ERR_INV_PARAM;
+        if (!v || !data)
+                return EINV;
 
-        if (!vint_bounds_check(vec, pos))
-                return ERR_OUT_OF_RANGE;
+        if (!inbounds(v, pos))
+                return EOOB;
 
-        if (pos == vec->size)
-                return v_push_back(vec, data);
+        if (pos == v->size)
+                return vct_push(v, data);
 
-        void **tmp = realloc(vec->items, (vec->size + 1) * sizeof(void*));
+        void **tmp = realloc(v->items, (v->size + 1) * sizeof(void*));
         if (!tmp)
-                return ERR_REALLOC;
+                return EREALLOC;
 
-        vec->items = tmp;
-        vec->size++;
+        v->items = tmp;
+        v->size++;
 
         /* Shift the others to the right to make space at items[index]. */
-        for (index i = vec->size; i >= pos; i--) {
-                vec->items[i] = vec->items[i - 1];
+        for (idx i = v->size; i >= pos; i--) {
+                v->items[i] = v->items[i - 1];
         }
 
-        vec->items[pos] = data;
+        v->items[pos] = data;
         return 0;
 }
 
 /*
- * Returns a read only pointer from this given position.
+ * Returns a pointer from a given position.
  * Useful for obtaining subvectors.
- * The given pointer must not be freed. Use v_rm() for that.
+ * The given pointer must not be freed. Use vct_rm() for that.
  */
-void *v_get_item_ptr(const struct vector *vec, index pos)
+void *vct_subptr(const struct vector *v, idx pos)
 {
-        if (!vint_bounds_check(vec, pos))
+        if (!inbounds(v, pos))
                 return NULL;
 
-        return vec->items[pos];
+        return v->items[pos];
 }
 
 /*
  * Removes the last pointer from the array.
  * The allocated memory block is also freed.
- * Returns 0 on success and an error code on failure.
  */
-int v_pop_back(struct vector *vec)
+int vct_pop(struct vector *v)
 {
-        if (!vec)
-                return ERR_INV_PARAM;
+        if (!v)
+                return EINV;
 
-        free(vec->items[vec->size - 1]);
-        vec->size--;
+        free(v->items[v->size - 1]);
+        v->size--;
 
         /* no items left, free the pointer array. */
-        if (vec->size == 0) {
-                free(vec->items);
+        if (v->size == 0) {
+                free(v->items);
                 return 0;
         }
 
-        void **tmp = realloc(vec->items, (vec->size + 1) * sizeof(void*));
+        void **tmp = realloc(v->items, (v->size + 1) * sizeof(void*));
         if (tmp == NULL)
-                return ERR_REALLOC;
+                return EREALLOC;
 
-        vec->items = tmp;
+        v->items = tmp;
         return 0;
 }
 
 /*
  * Removes a pointer from the array at the given position.
  * The allocated memory block is also freed.
- * Returns 0 on success and an error code on failure.
  */
-int v_rm(struct vector *vec, index pos)
+int vct_rm(struct vector *v, idx pos)
 {
-        if (vec == NULL)
-                return ERR_INV_PARAM;
+        if (v == NULL)
+                return EINV;
 
-        if (!vint_bounds_check(vec, pos))
-                return ERR_OUT_OF_RANGE;
+        if (!inbounds(v, pos))
+                return EOOB;
 
-        free(vec->items[pos]);
+        free(v->items[pos]);
         /* reduce the size first to avoid shifting in OOB values later */
-        vec->size--;
+        v->size--;
 
         /* no items left, free the pointer array. */
-        if (vec->size == 0) {
-                free(vec->items);
+        if (v->size == 0) {
+                free(v->items);
                 return 0;
         }
-        /* this is not buffer overflow because the resizing hasn't been made yet */
-        for (index i = pos; i < vec->size; i++) {
-                vec->items[i] = vec->items[i + 1];
+
+        for (idx i = pos; i < v->size; i++) {
+                v->items[i] = v->items[i + 1];
         }
 
-        void **tmp = realloc(vec->items, (vec->size + 1) * sizeof(void*));
+        void **tmp = realloc(v->items, (v->size + 1) * sizeof(void*));
         if (tmp == NULL)
-                return ERR_REALLOC;
+                return EREALLOC;
 
-        vec->items = tmp;
+        v->items = tmp;
         return 0;
 }
 
@@ -175,13 +171,13 @@ int v_rm(struct vector *vec, index pos)
  * Removes all pointers from the array, then frees the vector pointer.
  * Frees all allocated memory blocks.
  */
-int v_del(struct vector *vec)
+int vct_del(struct vector *v)
 {
-        if (vec == NULL)
-                return ERR_INV_PARAM;
+        if (v == NULL)
+                return EINV;
 
-        if (vec->size == 0){
-                free(vec);
+        if (v->size == 0){
+                free(v);
                 return 0;
         }
 
@@ -190,12 +186,12 @@ int v_del(struct vector *vec)
          * The reason behind this is we iterate with size_t to avoid
          * implementation defined behaviour.
          */
-        for (index i = (vec->size - 1); i > 0; i--) {
-                free(vec->items[i]);
+        for (idx i = (v->size - 1); i > 0; i--) {
+                free(v->items[i]);
         }
 
-        free(vec->items[0]);
-        free(vec->items);
-        free(vec);
+        free(v->items[0]);
+        free(v->items);
+        free(v);
         return 0;
 }

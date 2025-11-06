@@ -12,47 +12,49 @@
 #include "vector.h"
 #include "date.h"
 
-#define NAME_MAX_LEN 100
-#define EMAIL_MAX_LEN 50
-#define PLATE_MAX_LEN 15
-#define DESCRIPTION_MAX_LEN 100
-#define PHONENUM_MAX_LEN 20
+/* struct size macros */
+
+#define NAME_SIZE 100
+#define EMAIL_SIZE 50
+#define PLATE_SIZE 15
+#define DESC_SIZE 100
+#define PHNUM_SIZE 20
 
 struct client {
-        char name[NAME_MAX_LEN + 1];
-        char email[EMAIL_MAX_LEN + 1];
-        char phone[PHONENUM_MAX_LEN + 1];
+        char name[NAME_SIZE + 1];
+        char email[EMAIL_SIZE + 1];
+        char phone[PHNUM_SIZE + 1];
         struct vector *cars;
 };
 
 struct car {
-        char name[NAME_MAX_LEN + 1];
-        char plate[PLATE_MAX_LEN + 1];
+        char name[NAME_SIZE + 1];
+        char plate[PLATE_SIZE + 1];
         struct vector *operations;
 };
 
 struct operation {
-        char desc[DESCRIPTION_MAX_LEN + 1];
+        char desc[DESC_SIZE + 1];
         double price;
         struct date date;
 };
 
-int client_create(struct vector *parent, const char *name, const char *email,
+int obj_cl(struct vector *link, const char *name, const char *mail,
         const char *phone);
-int car_create(const struct client *parent, const char *name,
+int obj_car(const struct client *link, const char *name,
         const char *plate);
-int op_create(const struct car *parent, const char *desc, double price,
+int obj_op(const struct car *parent, const char *desc, double price,
         const char *date);
 
-int client_modify(struct client *client, const char *new_name,
-        const char *new_email, const char *new_phone);
-int car_modify(struct car *car, const char *new_name,
-        const char *new_plate);
-int op_modify(struct operation *op, const char *new_desc, double new_price,
+int obj_cl_mod(struct client *src, const char *name,
+        const char *email, const char *phone);
+int obj_car_mod(struct car *src, const char *name,
+        const char *plate);
+int obj_mod(struct operation *src, const char *desc, double price,
         const char *date);
 
-int op_remove(const struct car *parent, index pos);
-int car_remove(const struct client *parent, index pos);
-int client_remove(struct vector *parent, index pos);
+int obj_op_rm(const struct car *src, idx pos);
+int obj_car_rm(const struct client *src, idx pos);
+int obj_cl_rm(struct vector *src, idx pos);
 
 #endif //REPAIRSHOP_OBJECTS_H

@@ -9,36 +9,34 @@
 #include "vector.h"
 
 struct database {
-        char name[NAME_MAX_LEN + 1];
-        char desc[DESCRIPTION_MAX_LEN + 1];
-        struct vector *clients;
+        char name[NAME_SIZE + 1];
+        char desc[DESC_SIZE + 1];
+        struct vector *cl;
 };
 
 struct database *db_init(const char *name, const char *desc);
 
-int db_add_client(const struct database *db, const char *name,
+int db_cl_add(const struct database *db, const char *name,
         const char *email, const char *phone);
-int db_add_car(const struct database *db, index client,
+int db_car_add(const struct database *db, idx cl,
         const char *name, const char *plate);
-int db_add_op(const struct database *db, index client, index car,
+int db_op_add(const struct database *db, idx cl, idx car,
         const char *desc, double price, const char *date);
 
-struct client *db_get_client(const struct database *db, index client);
-struct car *db_get_car(const struct database *db, index client, index car);
-struct operation *db_get_op(const struct database *db, index client,
-        index car, index op);
+struct client *db_cl_get(const struct database *db, idx cl);
+struct car *db_car_get(const struct database *db, idx cl, idx car);
+struct operation *db_op_get(const struct database *db, idx cl, idx car, idx op);
 
-int db_modify_client(const struct database *db, index client_i,
-        const char *new_name, const char *new_email, const char *new_phone);
-int db_modify_car(const struct database *db, index client_i,
-        index car_i, const char *new_name, const char *new_plate);
-int db_modify_op(const struct database *db, index client_i, index car_i,
-        index op_i, const char *new_desc, double new_price,
-        const char *new_date);
+int db_cl_mod(const struct database *db, idx cl, const char *name,
+        const char *email, const char *phone);
+int db_car_mod(const struct database *db, idx cl, idx car, const char *name,
+        const char *plate);
+int db_op_mod(const struct database *db, idx cl, idx car, idx op,
+        const char *new_desc, double new_price, const char *new_date);
 
-int db_rm_client(const struct database *db, index pos);
-int db_rm_car(const struct database *db, index client, index car);
-int db_rm_op(const struct database *db, index client, index car, index op);
+int db_cl_rm(const struct database *db, idx cl);
+int db_car_rm(const struct database *db, idx cl, idx car);
+int db_op_rm(const struct database *db, idx cl, idx car, idx op);
 
 int db_del(struct database *db);
 #endif //REPAIRSHOP_DATABASE_H

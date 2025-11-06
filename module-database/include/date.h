@@ -5,7 +5,11 @@
 #include <stdio.h>
 
 struct date {
-        int y, mon, d, h, min;
+        int y;          /* year */
+        int mon;        /* month */
+        int d;          /* day */
+        int h;          /* hour */
+        int min;        /* minute */
 };
 
 struct date date_now(void);

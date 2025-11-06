@@ -1,16 +1,15 @@
 /*
- * File: errorcodes.h
- * Description: Macros for the magic constants used as error codes.
+ * errorcodes.h - project error codes
  */
 
 #ifndef REPAIRSHOP_ERRORCODES_H
 #define REPAIRSHOP_ERRORCODES_H
 
-#define ERR_CALLOC_NULL NULL
-#define ERR_INV_PARAM (-1)
-#define ERR_OUT_OF_RANGE 1
-#define ERR_CALLOC 2
-#define ERR_REALLOC 3
-#define ERR_FILE_ACCESS 4
+#define EMEMNULL NULL   /* malloc fails */
+#define EINV (-1)       /* invalid function parameter */
+#define EOOB 1          /* out of bounds */
+#define EMALLOC 2       /* malloc fails */
+#define EREALLOC 3      /* realloc fails */
+#define EFPERM 4        /* file permission error */
 
 #endif //REPAIRSHOP_ERRORCODES_H

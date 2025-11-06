@@ -7,61 +7,57 @@
 /*
  * Allocates and fills a client struct and links it to its given parent vector.
  * String length validation is done by the caller.
- * Returns 0 on success and an error code on failure.
  */
-int client_create(struct vector *parent, const char *name, const char *email,
+int obj_cl(struct vector *link, const char *name, const char *mail,
         const char *phone)
 {
-        if (!parent)
-                return ERR_INV_PARAM;
+        if (!link)
+                return EINV;
 
-        struct client *c = calloc(1, sizeof(struct client));
+        struct client *c = malloc(sizeof(struct client));
         if (!c)
-                return ERR_CALLOC;
+                return EMALLOC;
 
         strcpy(c->name, name);
-        strcpy(c->email, email);
+        strcpy(c->email, mail);
         strcpy(c->phone, phone);
-        c->cars = v_init();
-        return v_push_back(parent, c);
+        c->cars = vct();
+        return vct_push(link, c);
 }
 
 /*
  * Allocates and fills a car struct and links it to its given client struct.
  * String length validation is done by the caller.
- * Returns 0 on success and an error code on failure.
  */
-int car_create(const struct client *parent, const char *name,
-        const char *plate)
+int obj_car(const struct client *link, const char *name, const char *plate)
 {
-        if (!parent)
-                return ERR_INV_PARAM;
+        if (!link)
+                return EINV;
 
-        struct car *c = calloc(1, sizeof(struct car));
+        struct car *c = malloc(sizeof(struct car));
         if (!c)
-                return ERR_CALLOC;
+                return EMALLOC;
 
         strcpy(c->name, name);
         strcpy(c->plate, plate);
-        c->operations = v_init();
-        return v_push_back(parent->cars, c);
+        c->operations = vct();
+        return vct_push(link->cars, c);
 }
 
 /*
  * Allocates and fills an operation struct and links it to its given car struct.
  * String length validation is done by the caller.
  * Pass NULL to date for the current date.
- * Returns 0 on success and an error code on failure.
  */
-int op_create(const struct car *parent, const char *desc, const double price,
+int obj_op(const struct car *parent, const char *desc, double price,
         const char *date)
 {
         if (!parent)
-                return ERR_INV_PARAM;
+                return EINV;
 
-        struct operation *op = calloc(1, sizeof(struct operation));
+        struct operation *op = malloc(sizeof(struct operation));
         if (!op)
-                return ERR_CALLOC;
+                return EMALLOC;
 
         strcpy(op->desc, desc);
         op->price = price;
@@ -71,23 +67,22 @@ int op_create(const struct car *parent, const char *desc, const double price,
         else
                 op->date = date_parse(date);
 
-        return v_push_back(parent->operations, op);
+        return vct_push(parent->operations, op);
 }
 
 /*
  * Modifies a client's data.
  * String length validation is done by the caller.
- * Returns 0 on success and an error code on failure.
  */
-int client_modify(struct client *client, const char *new_name,
-        const char *new_email, const char *new_phone)
+int obj_cl_mod(struct client *src, const char *name, const char *email,
+        const char *phone)
 {
-        if (!client)
-                return ERR_INV_PARAM;
+        if (!src)
+                return EINV;
 
-        strcpy(client->name, new_name);
-        strcpy(client->email, new_email);
-        strcpy(client->phone, new_phone);
+        strcpy(src->name, name);
+        strcpy(src->email, email);
+        strcpy(src->phone, phone);
 
         return 0;
 }
@@ -95,16 +90,14 @@ int client_modify(struct client *client, const char *new_name,
 /*
  * Modifies a car's data.
  * String length validation is done by the caller.
- * Returns 0 on success and an error code on failure.
  */
-int car_modify(struct car *car, const char *new_name,
-        const char *new_plate)
+int obj_car_mod(struct car *src, const char *name, const char *plate)
 {
-        if (!car)
-                return ERR_INV_PARAM;
+        if (!src)
+                return EINV;
 
-        strcpy(car->name, new_name);
-        strcpy(car->plate, new_plate);
+        strcpy(src->name, name);
+        strcpy(src->plate, plate);
 
         return 0;
 }
@@ -112,20 +105,19 @@ int car_modify(struct car *car, const char *new_name,
 /*
  * Modifies an operation's data.
  * String length validation is done by the caller.
- * Returns 0 on success and an error code on failure.
  */
-int op_modify(struct operation *op, const char *new_desc, const double new_price,
+int obj_mod(struct operation *src, const char *desc, double price,
         const char *date)
 {
-        if (!op)
-                return ERR_INV_PARAM;
+        if (!src)
+                return EINV;
 
-        strcpy(op->desc, new_desc);
-        op->price = new_price;
+        strcpy(src->desc, desc);
+        src->price = price;
         if (!date)
-                op->date = date_now();
+                src->date = date_now();
         else {
-                op->date = date_parse(date);
+                src->date = date_parse(date);
         }
 
         return 0;
@@ -135,45 +127,41 @@ int op_modify(struct operation *op, const char *new_desc, const double new_price
 /*
  * Removes an operation struct at the given pos in a car struct.
  * The given object is also deallocated.
- * Returns 0 on success and an error code on failure.
  */
-int op_remove(const struct car *parent, const index pos)
+int obj_op_rm(const struct car *src, idx pos)
 {
-        return v_rm(parent->operations, pos);
+        return vct_rm(src->operations, pos);
 }
 
 /*
  * Removes a car struct at the given position in a client struct.
  * All operation structs and the car struct will be deallocated.
- * Returns 0 on success and error code on failure.
  */
-int car_remove(const struct client *parent, const index pos)
+int obj_car_rm(const struct client *src, idx pos)
 {
-        struct car *car = v_get_item_ptr(parent->cars, pos);
+        struct car *car = vct_subptr(src->cars, pos);
         if (!car)
-                return ERR_OUT_OF_RANGE;
+                return EOOB;
 
-        v_del(car->operations);
-        return v_rm(parent->cars, pos);
+        vct_del(car->operations);
+        return vct_rm(src->cars, pos);
 }
 
 /*
  * Removes a client struct at the given position in a vector.
  * All car structs and its operation structs and the client struct will be freed.
- * Returns 0 on success and error code on failure.
  */
-int client_remove(struct vector *parent, const index pos)
+int obj_cl_rm(struct vector *src, idx pos)
 {
-        const struct client *client = v_get_item_ptr(parent, pos);
+        const struct client *client = vct_subptr(src, pos);
         if (!client)
-                return ERR_OUT_OF_RANGE;
+                return EOOB;
 
-        const index client_cars = client->cars->size;
+        idx client_cars = client->cars->size;
         for (size_t i = 0; i < client_cars; i++) {
-                car_remove(client, 0);
+                obj_car_rm(client, 0);
         }
 
-        v_del(client->cars);
-
-        return v_rm(parent, pos);
+        vct_del(client->cars);
+        return vct_rm(src, pos);
 }

@@ -14,24 +14,24 @@
 #include "../../include/errorcodes.h"
 #include "../../include/external/debugmalloc.h"
 
-#define index size_t
+#define idx size_t /* index */
 
 struct vector {
         void **items;
         size_t size;
 };
 
-struct vector *v_init(void);
+struct vector *vct(void);
 
-bool vint_bounds_check(const struct vector *vec, index pos);
+bool inbounds(const struct vector *v, idx pos);
 
-int v_push_back(struct vector *vec, void *data);
-int v_insert(struct vector *vec, void *data, index pos);
+int vct_push(struct vector *v, void *data);
+int vct_insert(struct vector *v, void *data, idx pos);
 
-void *v_get_item_ptr(const struct vector *vec, index pos);
+void *vct_subptr(const struct vector *v, idx pos);
 
-int v_pop_back(struct vector *vec);
-int v_rm(struct vector *vec, index pos);
+int vct_pop(struct vector *v);
+int vct_rm(struct vector *v, idx pos);
 
-int v_del(struct vector *vec);
+int vct_del(struct vector *v);
 #endif //REPAIRSHOP_VECTOR_H

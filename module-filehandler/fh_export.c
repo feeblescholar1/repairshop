@@ -1,4 +1,4 @@
-#include "include/filehandler_export.h"
+#include "include/fh_export.h"
 
 void fh_client_export(struct client *client, FILE *target)
 {
@@ -22,18 +22,18 @@ int fh_export(const struct database *db)
 {
         FILE *target = fopen("export.txt", "w");
         if (!target)
-                return ERR_FILE_ACCESS;
+                return EFPERM;
 
-        for (index i = 0; i < db->clients->size; i++) {
-                struct client *client = db_get_client(db, i);
+        for (idx i = 0; i < db->cl->size; i++) {
+                struct client *client = db_cl_get(db, i);
                 fh_client_export(client, target);
 
-                for (index j = 0; j < client->cars->size; j++) {
-                        struct car *car = db_get_car(db, i, j);
+                for (idx j = 0; j < client->cars->size; j++) {
+                        struct car *car = db_car_get(db, i, j);
                         fh_car_export(car, target);
 
-                        for (index k = 0; k < car->operations->size; k++) {
-                                struct operation *op = db_get_op(db, i, j, k);
+                        for (idx k = 0; k < car->operations->size; k++) {
+                                struct operation *op = db_op_get(db, i, j, k);
                                 fh_op_export(op, target);
                         }
 
