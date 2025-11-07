@@ -21,22 +21,23 @@
 #define PHNUM_SIZE 20
 
 struct client {
-        char name[NAME_SIZE + 1];
-        char email[EMAIL_SIZE + 1];
-        char phone[PHNUM_SIZE + 1];
-        struct vector *cars;
+        char name[NAME_SIZE + 1];       /* no format */
+        char email[EMAIL_SIZE + 1];     /* format: usr@domain */
+        char phone[PHNUM_SIZE + 1];     /* format: +1122334455 ... */
+        struct vector *cars;            /* this clients car ptrs */
 };
 
 struct car {
-        char name[NAME_SIZE + 1];
-        char plate[PLATE_SIZE + 1];
-        struct vector *operations;
+        char name[NAME_SIZE + 1];       /* no format */
+        char plate[PLATE_SIZE + 1];     /* format: ABC123 or ABCD123 */
+        struct vector *operations;      /* this cars operation ptrs */
 };
 
 struct operation {
-        char desc[DESC_SIZE + 1];
-        double price;
-        struct date date;
+        char desc[DESC_SIZE + 1];       /* description, no format */
+        double price;                   /* display format: .2f */
+        struct date date_cr;            /* format: YYYY-MM-DD HH:MM */
+        struct date date_exp;           /* format: YYYY-MM-DD HH:MM */
 };
 
 int obj_cl(struct vector *link, const char *name, const char *mail,

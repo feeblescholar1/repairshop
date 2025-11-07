@@ -11,7 +11,7 @@
 struct database {
         char name[NAME_SIZE + 1];
         char desc[DESC_SIZE + 1];
-        struct vector *cl;
+        struct vector *cl;              /* database clients */
 };
 
 struct database *db_init(const char *name, const char *desc);

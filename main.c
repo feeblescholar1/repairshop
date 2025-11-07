@@ -2,8 +2,7 @@
 
 #include "module-database/include/database.h"
 #include "module-interface/include/intf.h"
-#include "module-filehandler/include/fh_export.h"
-#include "module-filehandler/include/fh_import.h"
+#include "module-filehandler/include/fh.h"
 
 int main(void)
 {

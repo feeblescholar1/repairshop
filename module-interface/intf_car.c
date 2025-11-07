@@ -4,7 +4,7 @@ void intf_car_txt(const struct database *db, idx cl)
 {
         struct client *cl_ = db_cl_get(db, cl);
 
-        puts("\n------------------- Autok kezelese -------------------");
+        puts("\n---------------- Autok kezelese ----------------");
         puts("[0] Vissza");
         puts("[1] Auto hozzadasa");
         puts("[2] Auto adatainak modositasa");
@@ -12,9 +12,9 @@ void intf_car_txt(const struct database *db, idx cl)
         puts("[4] Javitas/vizsga hozzadasa");
         puts("[5] Javitas/vizsga adatainak modositasa");
         puts("[6] Javitas/vizsga eltavolitasa");
-        puts("-------------------------------------------------------");
+        puts("-------------------------------------------------");
         printf("[%s][%s][%s]\n", cl_->name, cl_->email, cl_->phone);
-        puts("-------------------------------------------------------\n");
+        puts("-------------------------------------------------");
         if (cl_->cars->size == 0) {
                 puts("Ennek az ugyfelnek nincsenek hozzadott autoi.");
                 goto txt_end;
@@ -26,15 +26,23 @@ void intf_car_txt(const struct database *db, idx cl)
                 for (idx j = 0; j < car->operations->size; j++) {
                         struct operation *op = db_op_get(db, cl, i, j);
                         char date_str[17];
-                        date_printf(&op->date, date_str);
+                        date_printf(&op->date_cr, date_str);
 
-                        printf("\t\t[%zu][%s][%.2f][%s]\n", j, op->desc,
+                        printf("\t\t[%zu][%s][%.2f][%s]", j, op->desc,
                                 op->price, date_str);
+
+                        if (op->date_exp.y != 0) {
+                                char date_str2[17];
+                                date_printf(&op->date_exp, date_str2);
+                                printf("->[%s]", date_str2);
+                        }
+
+                        puts("");
                 }
         }
 
         txt_end:
-                puts("\n--------------------------------------------------------");
+                puts("\n--------------------------------------------------");
                 printf("Opcio: ");
 
 }
@@ -96,7 +104,7 @@ int intf_car(const struct database *db, idx cl)
 
                                 response = intf_op_mod(db, cl, opt,opt2);
                                 if (response == EOOB)
-                                        puts("\nAz auto/javitas nem talalhato.");
+                                        puts("\nAz elem nem talalhato.");
                                 break;
 
                         case 6:
@@ -108,7 +116,7 @@ int intf_car(const struct database *db, idx cl)
 
                                 response = intf_op_rm(db, cl, opt, opt2);
                                 if (response == EOOB)
-                                        puts("\nAz auto/javitas nem talalhato.");
+                                        puts("\nAz elem nem talalhato.");
                                 break;
                         default:
                                 puts("\nErvenytelen opcio.\n");
@@ -139,16 +147,23 @@ int intf_op_add(const struct database *db, idx cl, idx car)
 
         char desc_buffer[DESC_SIZE + 1] = "\0";
         char price_buffer[DEFAULT_BUF_SIZE + 1] = "\0";
+        char date_buffer[DEFAULT_BUF_SIZE + 1] = "\0";
         double price = 0;
 
-        printf("Javitas leirasa (max. %d karakter): ", DESC_SIZE);
+        printf("Javitas/vizsga leirasa (max. %d karakter): ", DESC_SIZE);
         intf_io_fgets(desc_buffer, DESC_SIZE + 1);
 
-        printf("Javitas koltsege: ");
+        printf("Javitas/vizsga koltsege: ");
         intf_io_fgets(price_buffer, DEFAULT_BUF_SIZE + 1);
         price = strtod(price_buffer, NULL);
 
-        return db_op_add(db, cl, car, desc_buffer, price, NULL);
+        printf("Vizsga eseten ervenyesseg lejarta (formatum: EEEE-HH-NN OO-PP): ");
+        intf_io_fgets(date_buffer, DEFAULT_BUF_SIZE + 1);
+
+        if (date_buffer[0] == '\n')
+                return db_op_add(db, cl, car, desc_buffer, price, NULL);
+
+        return db_op_add(db, cl, car, desc_buffer, price, date_buffer);
 }
 
 int intf_car_mod(const struct database *db, idx cl, idx car)
@@ -159,7 +174,8 @@ int intf_car_mod(const struct database *db, idx cl, idx car)
         printf("Auto tipusa (max. %d karakter): ", NAME_SIZE);
         intf_io_fgets(name_buffer, NAME_SIZE + 1);
 
-        printf("Auto rendszama (max. %d karakter): ", PLATE_SIZE);
+        printf("Auto rendszama (max. %d karakter, formatum: ABC123 vagy ABCD123): ",
+                PLATE_SIZE);
         intf_io_fgets(plate_buffer, PLATE_SIZE + 1);
 
         return db_car_mod(db, cl, car, name_buffer, plate_buffer);

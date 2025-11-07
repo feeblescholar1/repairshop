@@ -47,7 +47,7 @@ int obj_car(const struct client *link, const char *name, const char *plate)
 /*
  * Allocates and fills an operation struct and links it to its given car struct.
  * String length validation is done by the caller.
- * Pass NULL to date for the current date.
+ * Pass NULL for date if date_exp is not needed.
  */
 int obj_op(const struct car *parent, const char *desc, double price,
         const char *date)
@@ -62,10 +62,14 @@ int obj_op(const struct car *parent, const char *desc, double price,
         strcpy(op->desc, desc);
         op->price = price;
 
-        if (!date)
-                op->date = date_now();
+        if (date)
+                op->date_exp = date_parse(date);
         else
-                op->date = date_parse(date);
+                /* Set the first element to 0 to know this is not used. */
+                op->date_exp.y = 0;
+
+
+        op->date_cr = date_now();
 
         return vct_push(parent->operations, op);
 }
@@ -115,9 +119,9 @@ int obj_mod(struct operation *src, const char *desc, double price,
         strcpy(src->desc, desc);
         src->price = price;
         if (!date)
-                src->date = date_now();
+                src->date_cr = date_now();
         else {
-                src->date = date_parse(date);
+                src->date_cr = date_parse(date);
         }
 
         return 0;
