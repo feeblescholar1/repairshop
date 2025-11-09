@@ -3,7 +3,7 @@
  */
 #include "include/intf_io.h"
 
-void intf_io_fgets(char *buffer, int size)
+void intf_io_fgets(char *buffer, size_t size)
 {
         fgets(buffer, size, stdin);
 

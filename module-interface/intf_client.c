@@ -26,7 +26,7 @@ void intf_cl_txt(const struct database *db)
 
         puts("\n-------------------------------------------------------");
         printf("\nOpcio: ");
-};
+}
 
 int intf_cl(const struct database *db)
 {

@@ -42,7 +42,7 @@ int fh_parse_car(struct database *dst, idx cl, char *str)
         char name[NAME_SIZE + 1] = "\0";
         char plate[PLATE_SIZE + 1] = "\0";
 
-        char *token = strtok(str, ">");
+        strtok(str, ">");
         strcpy(name, strtok(NULL, "|"));
         strcpy(plate, strtok(NULL, "\n"));
 
