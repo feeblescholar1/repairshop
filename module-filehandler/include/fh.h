@@ -5,9 +5,8 @@
 #include "../../module-interface/include/intf_io.h"
 
 /*
- * Due to the line format (ID> DATA | DATA | ...) we have to make some space for
- * this in the read buffer:
- * 1 ID char + 4 US (at most) + 1 null
+ * Due to the line format we have to make some space for this in the read buffer:
+ * 1 ID char + 4 pipes (at most) + 1 null-terminator
  */
 #define FORMAT_RQ (1 + 4 + 1)
 #define LONGEST_VALID_LINE (NAME_SIZE + EMAIL_SIZE + PHNUM_SIZE + FORMAT_RQ)

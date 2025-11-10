@@ -1,21 +1,21 @@
 #include "include/fh.h"
 
+/* Exports client in the following format: U>name|email|phone */
 void fh_client_export(struct client *client, FILE *target)
 {
-        /* export format: U>name|email|phone */
         fprintf(target, "U>%s|%s|%s\n", client->name, client->email,
                  client->phone);
 }
 
+/* Exports car in the following format: A>name|plate */
 void fh_car_export(struct car *car, FILE *target)
 {
-        /* export format: A>name|plate */
         fprintf(target, "A>%s|%s\n", car->name, car->plate);
 }
 
+/* Exports car in the following format: J>desc|price|date_cr|date_exp */
 void fh_op_export(struct operation *op, FILE *target)
 {
-        /* export format: J>desc|price|date_cr|date_exp */
         fprintf(target, "J>%s|%f|%d-%02d-%02d %02d:%02d|", op->desc,
                 op->price, op->date_cr.y, op->date_cr.mon,
                 op->date_cr.d, op->date_cr.h, op->date_cr.min);
@@ -28,6 +28,10 @@ void fh_op_export(struct operation *op, FILE *target)
                 fprintf(target, "0\n");
 }
 
+/*
+ * f(ile)h(andler) export - exports db to export.txt
+ * The export formats can be found in the comments above.
+ */
 int fh_export(const struct database *db)
 {
         FILE *target = fopen("export.txt", "w");
