@@ -10,5 +10,6 @@ struct sres {
 };
 
 struct sres search_cl(struct database *db, const char *term);
+struct sres search_plate(struct database *db, const char *term);
 
 #endif //REPAIRSHOP_SEARCH_H

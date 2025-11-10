@@ -7,5 +7,6 @@
 
 int intf_search(struct database *db);
 int intf_search_cl(struct database *db);
+int intf_search_plate(struct database *db);
 
 #endif //REPAIRSHOP_INTF_SEARCH_H
