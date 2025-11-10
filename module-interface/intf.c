@@ -11,7 +11,7 @@ void intf_main_txt()
         puts("[0] Kilepes");
         puts("[1] Ugyfelek kezelese");
         puts("[2] Kereses");
-        puts("\n-------------------------------------------");
+        puts("-------------------------------------------");
         printf("Opcio: ");
 }
 
@@ -30,6 +30,11 @@ int intf_main(struct database *db)
                                 break;
                         case 1:
                                 resp = intf_cl(db);
+                                if (resp == EMALLOC)
+                                        return EMALLOC;
+                                break;
+                        case 2:
+                                resp = intf_search(db);
                                 if (resp == EMALLOC)
                                         return EMALLOC;
                                 break;

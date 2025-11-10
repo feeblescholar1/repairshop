@@ -6,6 +6,7 @@
 
 #include "intf_io.h"
 #include "intf_client.h"
+#include "intf_search.h"
 
 void intf_main_txt();
 int intf_main(struct database *db);

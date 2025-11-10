@@ -42,7 +42,7 @@ void intf_car_txt(const struct database *db, idx cl)
         }
 
         txt_end:
-                puts("\n--------------------------------------------------");
+                puts("--------------------------------------------------");
                 printf("Opcio: ");
 
 }
