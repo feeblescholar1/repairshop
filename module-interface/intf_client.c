@@ -9,13 +9,13 @@
  */
 void intf_cl_txt(const struct database *db)
 {
-        puts("\n------------------ Ugyfelek kezelese ------------------");
+        puts("------------------ Ugyfelek kezelese -----------------");
         puts("[0] Vissza");
         puts("[1] Ugyfel hozzadasa");
         puts("[2] Ugyfel adatainak modositasa");
         puts("[3] Ugyfel eltavolitasa");
         puts("[4] Ugyfel autoinak es szerviztortenetenek lekerdezese");
-        puts("-------------------------------------------------------");
+        puts("------------------------------------------------------");
 
         if (db->cl->size == 0) {
                 puts("Nincsenek hozzaadott ugyfelek.\n");
@@ -28,7 +28,7 @@ void intf_cl_txt(const struct database *db)
                 }
         }
 
-        puts("\n-------------------------------------------------------");
+        puts("------------------------------------------------------");
         printf("\nOpcio: ");
 }
 

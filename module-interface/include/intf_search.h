@@ -9,10 +9,12 @@
 #include "../../module-database/include/database.h"
 #include "../../include/search.h"
 #include "intf_io.h"
+#include "intf_car.h"
+#include "intf_client.h"
 
 int intf_search(struct database *db);
-int intf_search_cl(struct database *db);
-int intf_search_plate(struct database *db);
-int intf_search_exp(struct database *db);
+struct sres  intf_search_cl(struct database *db);
+struct sres  intf_search_plate(struct database *db);
+struct sres intf_search_exp(struct database *db);
 
 #endif //REPAIRSHOP_INTF_SEARCH_H

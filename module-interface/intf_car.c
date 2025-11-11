@@ -12,7 +12,7 @@ void intf_car_txt(const struct database *db, idx cl)
 {
         struct client *cl_ = db_cl_get(db, cl);
 
-        puts("\n---------------- Autok kezelese ----------------");
+        puts("\n------------------ Autok kezelese -------------------");
         puts("[0] Vissza");
         puts("[1] Auto hozzadasa");
         puts("[2] Auto adatainak modositasa");
@@ -20,9 +20,9 @@ void intf_car_txt(const struct database *db, idx cl)
         puts("[4] Javitas/vizsga hozzadasa");
         puts("[5] Javitas/vizsga adatainak modositasa");
         puts("[6] Javitas/vizsga eltavolitasa");
-        puts("-------------------------------------------------");
+        puts("------------------------------------------------------");
         printf("[%s][%s][%s]\n", cl_->name, cl_->email, cl_->phone);
-        puts("-------------------------------------------------");
+        puts("------------------------------------------------------");
         if (cl_->cars->size == 0) {
                 puts("Ennek az ugyfelnek nincsenek hozzadott autoi.");
                 goto txt_end;
@@ -50,7 +50,7 @@ void intf_car_txt(const struct database *db, idx cl)
         }
 
         txt_end:
-                puts("--------------------------------------------------");
+                puts("------------------------------------------------------");
                 printf("Opcio: ");
 
 }

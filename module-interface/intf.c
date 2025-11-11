@@ -8,13 +8,15 @@
 /**
  * @brief Prints the main menu's text to \c stdout .
  */
-void intf_main_txt()
+void intf_main_txt(struct database *db)
 {
-        puts("\n-------------- carrepairshop --------------");
+        puts("--------------------- repairshop ---------------------");
+        printf("Adatbazis: %s | %s", db->name, db->desc);
+        puts("------------------------------------------------------");
         puts("[0] Kilepes");
         puts("[1] Ugyfelek kezelese");
         puts("[2] Kereses");
-        puts("-------------------------------------------");
+        puts("------------------------------------------------------");
         printf("Opcio: ");
 }
 
@@ -29,7 +31,7 @@ int intf_main(struct database *db)
         bool mainloop_active = true;
         while (mainloop_active) {
                 setbuf(stdout, NULL);
-                intf_main_txt();
+                intf_main_txt(db);
                 int opt = intf_io_opt();
                 int resp = 0;
 

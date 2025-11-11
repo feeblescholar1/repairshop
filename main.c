@@ -21,7 +21,6 @@ int err_msg(int err_code)
 {
         switch (err_code) {
                 case EMALLOC:
-                case EREALLOC:
                         fprintf(stderr, "Memoriakezelesi hiba. Kilepes...\n");
                         break;
                 case EFPERM:
