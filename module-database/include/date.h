@@ -24,5 +24,6 @@ struct date {
 struct date date_now(void);
 struct date date_parse(const char *str);
 void date_printf(const struct date *date, char *dst);
+double date_diff(const struct date *date, const struct date *date2);
 
 #endif //REPAIRSHOP_DATE_H

@@ -60,3 +60,29 @@ void date_printf(const struct date *date, char *dst)
         snprintf(dst, 17, "%d-%02d-%02d %02d:%02d", date->y, date->mon, date->d,
                 date->h, date->min);
 }
+
+/**
+ * @brief Calculates the difference between date and date2.
+ * @param date Pointer to the date to flattened.
+ * @return The time difference in days.
+ */
+double date_diff(const struct date *date, const struct date *date2)
+{
+        struct tm t1 = {0};
+        t1.tm_year = date->y - 1900;
+        t1.tm_mon = date->mon - 1;
+        t1.tm_mday = date->d;
+        t1.tm_hour = date->h;
+        t1.tm_min = date->min;
+
+        struct tm t2 = {0};
+        t2.tm_year = date2->y - 1900;
+        t2.tm_mon = date2->mon - 1;
+        t2.tm_mday = date2->d;
+        t2.tm_hour = date2->h;
+        t2.tm_min = date2->min;
+
+        double ret = difftime(mktime(&t1), mktime(&t2)) / (60 * 60 * 24);
+
+        return ret;
+}

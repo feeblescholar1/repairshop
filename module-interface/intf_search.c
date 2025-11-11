@@ -9,6 +9,7 @@ void intf_search_txt()
         puts("[0] Vissza");
         puts("[1] Ugyfel keresese");
         puts("[2] Rendszam keresese");
+        puts("[3] 30 napon belul lejaro vizsgak listazasa");
         puts("-------------------");
 }
 
@@ -39,6 +40,11 @@ int intf_search(struct database *db)
                                 break;
                         case 2:
                                 resp = intf_search_plate(db);
+                                if (resp == EMALLOC)
+                                        return EMALLOC;
+                                break;
+                        case 3:
+                                resp = intf_search_exp(db);
                                 if (resp == EMALLOC)
                                         return EMALLOC;
                                 break;
@@ -133,6 +139,56 @@ int intf_search_plate(struct database *db)
                 printf("[%zu][%s][%s][%s]\n", db_idx[0], cl->name, cl->email,
                         cl->phone);
                 printf("\t[%zu][%s][%s]\n", db_idx[1], car->name, car->plate);
+        }
+        puts("--------------------------");
+
+        vct_del(res.map);
+        return 0;
+}
+
+/**
+ * Frontend for listing operation expiration.
+ * @param db The database pointer which the user will search in.
+ * @retval 0 On success.
+ * @retval EMALLOC If a memory allocation failure is occured.
+ */
+int intf_search_exp(struct database *db)
+{
+        struct sres res = search_expiration(db);
+        /* Handling these will be the same so the error code doesn't matter */
+        if (res.err == EREALLOC || res.err == EMALLOC)
+                return EMALLOC;
+
+        puts("--------------------------");
+
+        /* No results */
+        if (res.map->size == 0) {
+                puts("Nincs talalat.");
+                puts("--------------------------");
+                vct_del(res.map);
+                return 0;
+        }
+
+        /* Print the results to stdout */
+        for (idx i = 0; i < res.map->size; i++) {
+                /* Get the index of the result item */
+                idx *db_idx = vct_subptr(res.map, i);
+
+                struct client *cl = db_cl_get(db, db_idx[0]);
+                struct car *car = db_car_get(db, db_idx[0], db_idx[1]);
+                struct operation *op = db_op_get(db, db_idx[0], db_idx[1],
+                        db_idx[2]);
+
+                char date_cr[17] = "\0";
+                char date_exp[17] = "\0";
+                date_printf(&op->date_cr, date_cr);
+                date_printf(&op->date_exp, date_exp);
+
+                printf("[%zu][%s][%s][%s]\n", db_idx[0], cl->name, cl->email,
+                        cl->phone);
+                printf("\t[%zu][%s][%s]\n", db_idx[1], car->name, car->plate);
+                printf("\t\t[%zu][%s][%lf][%s]->[%s]\n", db_idx[2], op->desc,
+                        op->price, date_cr, date_exp);
         }
         puts("--------------------------");
 
