@@ -1,7 +1,11 @@
-/*
- * vector.h - generic vector struct definition, can be debugged with debugmalloc.h
- * Note: debugmalloc.h is an external header file not maintained by this project.
- *       Source: https://infoc.eet.bme.hu/debugmalloc/debugmalloc.h
+/**
+ * @file vector.h
+ * @brief Vector struct definition and function prototypes.
+ * @details Defines the vector and its funtion prototypes used in \c vector.c.
+ *          Include \c debugmalloc.h for memory analysis.
+ * @note \c debugmalloc.h is an external library not maintained by this project:
+ *       \htmlonly <a href=https://infoc.eet.bme.hu/debugmalloc/>Documentation (Hungarian)</a>\endhtmlonly |
+ *       \htmlonly<a href=https://infoc.eet.bme.hu/debugmalloc/debugmalloc.h>File mirror</a>\endhtmlonly
  */
 
 #ifndef REPAIRSHOP_VECTOR_H
@@ -14,11 +18,15 @@
 #include "../../include/errorcodes.h"
 #include "../../include/external/debugmalloc.h"
 
-#define idx size_t /* index */
+#define idx size_t /**< Macro for size_t */
 
+/**
+ * @struct vector vector.h
+ * @brief A vector for storing pointers.
+ */
 struct vector {
-        void **items;
-        size_t size;
+        void **items; /**< Generic dynamically allocated pointer array. */
+        size_t size; /**< The size of the vector */
 };
 
 struct vector *vct(void);

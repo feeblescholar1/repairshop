@@ -1,15 +1,24 @@
+/**
+ * @file date.h
+ * @brief Date structure and function prototype definitons.
+ */
+
 #ifndef REPAIRSHOP_DATE_H
 #define REPAIRSHOP_DATE_H
 
 #include <time.h>
 #include <stdio.h>
 
+/**
+ * @struct date date.h
+ * @brief A custom date structure.
+ */
 struct date {
-        int y;          /* year */
-        int mon;        /* month */
-        int d;          /* day */
-        int h;          /* hour */
-        int min;        /* minute */
+        int y;          /**< Year  */
+        int mon;        /**< Month */
+        int d;          /**< Day */
+        int h;          /**< Hour */
+        int min;        /**< Minute */
 };
 
 struct date date_now(void);

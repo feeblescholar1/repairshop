@@ -1,10 +1,18 @@
-/*
- * date.c - custom date functions
+/**
+ * @file date.c
+ * @brief Custom date functions.
+ * @details The functions defined in here manage the custom date structure, which
+ *          is basen on \c struct \c tm .
  */
 
 #include "include/date.h"
 
-/* Returns the current date. */
+/**
+ * @brief Gets the current date and time and creates a date structure.
+ * @return A newly created date structure.
+ * @note Unlike the objects in \c objects.h or the database in \c database.h
+ *       this object is \b not allocated on the heap.
+ */
 struct date date_now(void)
 {
         const time_t now = time(NULL);
@@ -23,7 +31,14 @@ struct date date_now(void)
         return ret;
 }
 
-/* Parses str and returns the date. */
+/**
+ * @brief Parses str to a new date structure.
+ * @param str A date to be parsed in a YYYY-MM-DD HH:MM format.
+ * @warning It's the caller's responsibility to ensure the correct format.
+ * @return A newly created date structure basen on str.
+ * @note Unlike the objects in \c objects.h or the database in \c database.h
+ *       this object is \b not allocated on the heap.
+ */
 struct date date_parse(const char *str)
 {
         struct date ret;
@@ -33,14 +48,15 @@ struct date date_parse(const char *str)
         return ret;
 }
 
-/* 'Prints' date to dst for display */
+/**
+ * @brief Similarly to \c asctime() , this function makes a user-readable string from a date.
+ * @param date The date to be 'printed'.
+ * @param dst The destination string. The output format will be: YYYY-MM-DD HH:MM.
+ * @warning The size of \c dst must be at least 17.
+ * @return -
+ */
 void date_printf(const struct date *date, char *dst)
 {
-        /*
-         * format: YYYY-MM-DD HH:MM
-         * 12 characters + 3 separators + 1 whitespace + 1 null-terminator
-         * Therefore sizeof(dst) has to be at least 17.
-         */
         snprintf(dst, 17, "%d-%02d-%02d %02d:%02d", date->y, date->mon, date->d,
                 date->h, date->min);
 }

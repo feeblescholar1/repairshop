@@ -1,15 +1,34 @@
-/*
- * objects.c - vector wrappers for managing clients, cars and operations
+/**
+ * @file objects.c
+ * @brief Function definitions for the objects used in the project.
+ * @details The functions defined here help initialize and manage objects on
+ *          the heap using the vectors defined in \c vector.h. The objects are:
+ *          clients, cars and operations. They have the same hierarchy as
+ *          mentioned.
+ *          Operaitions are linked to cars and cars are linked to clients.
+ *          Clients can be linked to any vector. This type of arrangement will
+ *          allow the program to link multiple objects to the same, higher
+ *          precedence one without any duplicate data.
+ * @warning Do not use these functions. Use the functions in \c database.c instead.
  */
 
 #include "include/objects.h"
 
-/*
- * Allocates and fills a client struct and links it to its given parent vector.
- * String length validation is done by the caller.
+/**
+ * @brief Allocates and initializes a client structure and links it to vector.
+ * @param link Pointer to the parent vector.
+ * @param name The client's name.
+ * @param email The client's email address.
+ * @param phone The client's phone number.
+ * @warning String parameters are not validated, it is the caller's
+ *          responsibility to make sure they fit into the structure.
+ * @return \c vct_push() - hands it over to the parent vector for linkage
+ * @retval 0 On success.
+ * @retval EINV If \c link is \c NULL .
+ * @retval EMALLOC If the client cannot be allocated.
  */
-int obj_cl(struct vector *link, const char *name, const char *mail,
-        const char *phone)
+int obj_cl(struct vector *link, const char *name, const char *email,
+           const char *phone)
 {
         if (!link)
                 return EINV;
@@ -19,15 +38,23 @@ int obj_cl(struct vector *link, const char *name, const char *mail,
                 return EMALLOC;
 
         strcpy(c->name, name);
-        strcpy(c->email, mail);
+        strcpy(c->email, email);
         strcpy(c->phone, phone);
         c->cars = vct();
         return vct_push(link, c);
 }
 
-/*
- * Allocates and fills a car struct and links it to its given client struct.
- * String length validation is done by the caller.
+/**
+ * @brief Allocates and initializes a car structure and links it to a client.
+ * @param link Pointer to the parent client structure.
+ * @param name The car's model.
+ * @param plate The car's plate number.
+ * @warning String parameters are not validated, it is the caller's
+ *          responsibility to make sure they fit into the structure.
+ * @return \c vct_push() - hands it over to the parent vector for linkage
+ * @retval 0 On success.
+ * @retval EINV If \c link is \c NULL .
+ * @retval EMALLOC If the car cannot be allocated.
  */
 int obj_car(const struct client *link, const char *name, const char *plate)
 {
@@ -44,15 +71,25 @@ int obj_car(const struct client *link, const char *name, const char *plate)
         return vct_push(link->cars, c);
 }
 
-/*
- * Allocates and fills an operation struct and links it to its given car struct.
- * String length validation is done by the caller.
- * Pass NULL for date if date_exp is not needed.
+/**
+ * @brief Allocates and initializes an operation structure and links it to a car.
+ * @param link Pointer to the parent car structure.
+ * @param desc The operation's description.
+ * @param price The operation's price.
+ * @param date The expiration date which will be parsed to \c op->date_exp . If
+ *             it's not needed, pass \c NULL.
+ * @warning String parameters are not validated, it is the caller's
+ *          responsibility to make sure they fit into the structure.
+ * @return \c vct_push() - hands it over to the parent vector for linkage
+ * @retval 0 On success.
+ * @retval EINV If \c link is \c NULL .
+ * @retval EMALLOC If the operation cannot be allocated.
+ * @note The creation date (\c op->date_cr) will always be the current date.
  */
-int obj_op(const struct car *parent, const char *desc, double price,
-        const char *date)
+int obj_op(const struct car *link, const char *desc, double price,
+           const char *date)
 {
-        if (!parent)
+        if (!link)
                 return EINV;
 
         struct operation *op = malloc(sizeof(struct operation));
@@ -71,15 +108,22 @@ int obj_op(const struct car *parent, const char *desc, double price,
 
         op->date_cr = date_now();
 
-        return vct_push(parent->operations, op);
+        return vct_push(link->operations, op);
 }
 
-/*
- * Modifies a client's data.
- * String length validation is done by the caller.
+/**
+ * @brief Modifies an existing client's data.
+ * @param src A pointer to a client structure to be modified.
+ * @param name The client's new name.
+ * @param email The client's new email address.
+ * @param phone The client's new phone number.
+ * @warning String parameters are not validated, it is the caller's
+ *          responsibility to make sure they fit into the structure.
+ * @retval 0 On success.
+ * @retval EINV If \c src is \c NULL .
  */
 int obj_cl_mod(struct client *src, const char *name, const char *email,
-        const char *phone)
+               const char *phone)
 {
         if (!src)
                 return EINV;
@@ -91,9 +135,15 @@ int obj_cl_mod(struct client *src, const char *name, const char *email,
         return 0;
 }
 
-/*
- * Modifies a car's data.
- * String length validation is done by the caller.
+/**
+ * @brief Modifies an existing car's data.
+ * @param src A pointer to a car structure to be modified.
+ * @param name The car's new name.
+ * @param plate The car's new plate number.
+ * @warning String parameters are not validated, it is the caller's
+ *          responsibility to make sure they fit into the structure.
+ * @retval 0 On success.
+ * @retval EINV If \c src is \c NULL .
  */
 int obj_car_mod(struct car *src, const char *name, const char *plate)
 {
@@ -106,9 +156,16 @@ int obj_car_mod(struct car *src, const char *name, const char *plate)
         return 0;
 }
 
-/*
- * Modifies an operation's data.
- * String length validation is done by the caller.
+/**
+ * @brief Modifies an existing operation's data.
+ * @param src A pointer to an operation structure to be modified.
+ * @param desc The operation's new description.
+ * @param price The operation's new price.
+ * @param date The operation's new expiration data.
+ * @warning String parameters are not validated, it is the caller's
+ *          responsibility to make sure they fit into the structure.
+ * @retval 0 On success.
+ * @retval EINV If \c src is \c NULL .
  */
 int obj_mod(struct operation *src, const char *desc, double price,
         const char *date)
@@ -128,18 +185,23 @@ int obj_mod(struct operation *src, const char *desc, double price,
 }
 
 
-/*
- * Removes an operation struct at the given pos in a car struct.
- * The given object is also deallocated.
+/**
+ * @brief Removes an operation from a car at the given index.
+ * @param src The pointer to the parent car structure.
+ * @param pos The index of the operation.
+ * @return \c vct_rm()
  */
 int obj_op_rm(const struct car *src, idx pos)
 {
         return vct_rm(src->operations, pos);
 }
 
-/*
- * Removes a car struct at the given position in a client struct.
- * All operation structs and the car struct will be deallocated.
+/**
+ * @brief Removes a car from a client at the given index.
+ * @param src The pointer to the parent client structure.
+ * @param pos The index of the car.
+ * @return \c vct_rm() or \c EOOB if \c pos is out of range.
+ * @note This deletes all operations related to the deleted car.
  */
 int obj_car_rm(const struct client *src, idx pos)
 {
@@ -151,9 +213,12 @@ int obj_car_rm(const struct client *src, idx pos)
         return vct_rm(src->cars, pos);
 }
 
-/*
- * Removes a client struct at the given position in a vector.
- * All car structs and its operation structs and the client struct will be freed.
+/**
+ * @brief Removes a client from a vector at the given index.
+ * @param src The pointer to the parent vector structure.
+ * @param pos The index of the client.
+ * @return \c vct_rm() or \c EOOB if \c pos is out of range.
+ * @note This deletes all cars and its operations related to the deleted client.
  */
 int obj_cl_rm(struct vector *src, idx pos)
 {

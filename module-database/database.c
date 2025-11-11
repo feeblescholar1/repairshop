@@ -1,12 +1,24 @@
-/*
- * database.c - main data structure function definitions
+/**
+ * @file database.c
+ * @brief Functions for the project database which manages objects.
+ * @details The main purpose of the database is to abstract object management
+ *          away from the programmer. It also handles memory management, which
+ *          means we don't have to worry about memory leaks and other memory
+ *          related errors/bugs. Just use \c db_del() to clean up and to avoid
+ *          leaks.
+ * @note Not all function return values are documented. Visit \c objects.c ,
+ *       \c vector.c and \c date.c for all possible return values.
  */
 
 #include "include/database.h"
 
-/*
- * Allocates and initializes a database.
- * Returns the pointer to the new database on success and NULL on failure.
+/**
+ * @brief Allocates and initializes a database on the heap.
+ * @param name The database's name.
+ * @param desc The database's description.
+ * @retval db On success.
+ * @retval NULL If \c name or \c desc is too large.
+ * @retval EMEMNULL If the database cannot be allocated.
  */
 struct database *db_init(const char *name, const char *desc)
 {
@@ -23,12 +35,18 @@ struct database *db_init(const char *name, const char *desc)
         return db;
 }
 
-/*
- * Creates a client object and links it to a database.
- * This function validates its parameters.
+/**
+ * @brief Adds a client to the database.
+ * @param db The pointer of the destination database.
+ * @param name The client's name.
+ * @param email The client's email address. Format: 'username@domain'
+ * @param phone The client's phone number. Format: '+11222333334444'
+ * @return \c obj_cl() - if the parameters are validated.
+ * @retval 0 On success.
+ * @retval EINV If \c db is \c NULL or at least 1 string is too large.
  */
 int db_cl_add(const struct database *db, const char *name, const char *email,
-        const char *phone)
+              const char *phone)
 {
         if (!db)
                 return EINV;
@@ -40,11 +58,16 @@ int db_cl_add(const struct database *db, const char *name, const char *email,
         return obj_cl(db->cl, name, email, phone);
 }
 
-/*
- * Creates a car object and links it to a database.
- * Car objects can only be linked to an existing client.
- * Throws an error if the client does not exist at the given index.
- * This function validates its parameters.
+/**
+ * @brief Adds a car to the database.
+ * @param db The pointer of the destination database.
+ * @param cl The client's index in the database to link the car to.
+ * @param name The car's name.
+ * @param plate The car's plate number. Format: 'ABC123' or 'ABCD123'.
+ * @return \c obj_car() - if the parameters are validated.
+ * @retval 0 On success.
+ * @retval EINV If \c db is \c NULL or at least 1 string is too large.
+ * @retval EOOB If the client doesn't exist in the database.
  */
 int db_car_add(const struct database *db, idx cl, const char *name,
         const char *plate)
@@ -62,14 +85,22 @@ int db_car_add(const struct database *db, idx cl, const char *name,
         return obj_car(client_, name, plate);
 }
 
-/*
- * Creates an operation object and links it to a database.
- * Operation objects can only be linked to an existing car object.
- * Throws an error if the client or the car does not exist at the given index.
- * This function validates its parameters.
+/**
+ * @brief Adds an operation to the database.
+ * @param db The pointer to the destination database.
+ * @param cl The client's index in the database.
+ * @param car The car's index in the database.
+ * @param desc The operation's description.
+ * @param price The operation's price.
+ * @param date The expiration date (if applicable). Pass to \c NULL to ignore.
+ *             Format: 'YYYY:MM:DD HH:MM'
+ * @return \c obj_op() - if the parameters ate validated
+ * @retval 0 On success.
+ * @retval EINV If \c db is \c NULL or at least 1 string is too large.
+ * @retval EOOB If the client or the car doesn't exist in the database.
  */
 int db_op_add(const struct database *db, idx cl, idx car,
-        const char *desc, double price, const char *date)
+              const char *desc, double price, const char *date)
 {
         if (!db)
                 return EINV;
@@ -84,9 +115,13 @@ int db_op_add(const struct database *db, idx cl, idx car,
         return obj_op(car_, desc, price, date);
 }
 
-/*
- * Returns a client object pointer from a database at the given index.
- * Returns NULL on failure.
+/**
+ * @brief Looks for a client in the database.
+ * @param db The pointer to the source database.
+ * @param cl The client's index in the database.
+ * @return A cast \c vct_subptr() .
+ * @retval client* On success.
+ * @retval NULL On failure.
  */
 struct client *db_cl_get(const struct database *db, idx cl)
 {
@@ -94,9 +129,14 @@ struct client *db_cl_get(const struct database *db, idx cl)
 }
 
 
-/*
- * Returns a car object pointer from a database at the given index.
- * Returns NULL on failure.
+/**
+ * @brief Looks for a car in the database.
+ * @param db The pointer to the source database.
+ * @param cl The client's index in the database.
+ * @param car The car's index in the database.
+ * @return A cast \c vct_subptr() .
+ * @retval car* On success.
+ * @retval NULL On failure.
  */
 struct car *db_car_get(const struct database *db, idx cl, idx car)
 {
@@ -107,9 +147,15 @@ struct car *db_car_get(const struct database *db, idx cl, idx car)
         return vct_subptr(client_->cars, car);
 }
 
-/*
- * Returns an operation object pointer from a database at the given index.
- * Returns NULL on failure.
+/**
+ * @brief Looks for an operation in the database.
+ * @param db The pointer to the source database.
+ * @param cl The client's index in the database.
+ * @param car The car's index in the database.
+ * @param op The operation's index in the database.
+ * @return A cast \c vct_subptr() .
+ * @retval car* On success.
+ * @retval NULL On failure.
  */
 struct operation *db_op_get(const struct database *db, idx cl, idx car, idx op)
 {
@@ -120,7 +166,18 @@ struct operation *db_op_get(const struct database *db, idx cl, idx car, idx op)
         return vct_subptr(car_->operations, op);
 }
 
-/* Modifies a client's data at the given index. */
+/**
+ * @brief Looks for and modifies a client in the database.
+ * @param db The pointer of the source database.
+ * @param name The client's new name.
+ * @param email The client's new email address.
+ * @param phone The client's new phone number.
+ * @return \c obj_cl_mod() - if the parameters are validated.
+ * @retval 0 On success.
+ * @retval EINV If \c db is \c NULL or at least 1 string is too large.
+ * @retval EOOB If the client doesn't exist in the database.
+ * @note For input formattting see \c db_cl_add() .
+ */
 int db_cl_mod(const struct database *db, idx cl, const char *name,
         const char *email, const char *phone)
 {
@@ -138,7 +195,19 @@ int db_cl_mod(const struct database *db, idx cl, const char *name,
         return obj_cl_mod(client, name, email, phone);
 }
 
-/* Modifies a car's data at the given index. */
+/**
+ * @brief Looks for and modifies a car in the database.
+ * @param db The pointer of the source database.
+ * @param cl The client's index in the database.
+ * @param car The car's index in the database.
+ * @param name The car's new name.
+ * @param plate The car's new plate number.
+ * @return \c obj_car_mod() - if the parameters are validated.
+ * @retval 0 On success.
+ * @retval EINV If \c db is \c NULL or at least 1 string is too large.
+ * @retval EOOB If the client or the car doesn't exist in the database.
+ * @note For input formattting see \c db_car_add() .
+ */
 int db_car_mod(const struct database *db, idx cl, idx car, const char *name,
         const char *plate)
 {
@@ -155,32 +224,58 @@ int db_car_mod(const struct database *db, idx cl, idx car, const char *name,
         return obj_car_mod(car_, name, plate);
 }
 
-/* Modifies an operation's data at the given index. */
+/**
+ * @brief Looks for and modifies an operation in the database.
+ * @param db The pointer to the destination database.
+ * @param cl The client's index in the database.
+ * @param car The car's index in the database.
+ * @param op The operation's index in the database.
+ * @param desc The operation's new description.
+ * @param price The operation's new price.
+ * @param date The new expiration date (if applicable). Pass to \c NULL to ignore.
+ * @return \c obj_op_mod() - if the parameters are validated
+ * @retval 0 On success.
+ * @retval EINV If \c db is \c NULL or at least 1 string is too large.
+ * @retval EOOB If the client/car/operation doesn't exist in the database.
+ * @note For input formattting see \c db_op_add() .
+ */
 int db_op_mod(const struct database *db, idx cl, idx car, idx op,
-        const char *new_desc, double new_price, const char *new_date)
+        const char *desc, double price, const char *date)
 {
         if (!db)
                 return EINV;
 
-        if (strlen(new_desc) > NAME_SIZE + 1)
+        if (strlen(desc) > NAME_SIZE + 1)
                 return EINV;
 
         struct operation *tmp = db_op_get(db, cl, car, op);
         if (!tmp)
                 return EOOB;
 
-        return obj_mod(tmp, new_desc, new_price, new_date);
+        return obj_mod(tmp, desc, price, date);
 }
 
-/* Removes a client from a database at the given index. */
+/**
+ * @brief Removes a client from the database.
+ * @param db The pointer to the source database.
+ * @param cl The client's index in the database.
+ * @return \c obj_cl_rm() with the proper paramaters.
+ * @retval 0 On success.
+ * @retval Non-zero On failure.
+ */
 int db_cl_rm(const struct database *db, idx cl)
 {
         return obj_cl_rm(db->cl, cl);
 }
 
-/*
- * Removes a car from a database at the given index.
- * The car object will be deallocated.
+/**
+ * @brief Removes a car from the database.
+ * @param db The pointer to the source database.
+ * @param cl The client's index in the database.
+ * @param car The car's index in the database.
+ * @return \c obj_car_rm() with the proper paramaters.
+ * @retval 0 On success.
+ * @retval Non-zero On failure.
  */
 int db_car_rm(const struct database *db, idx cl, idx car)
 {
@@ -191,9 +286,15 @@ int db_car_rm(const struct database *db, idx cl, idx car)
         return obj_car_rm(client_, car);
 }
 
-/*
- * Removes an operation from a database at the given index.
- * The operation object will be deallocated.
+/**
+ * @brief Removes an operation from the database.
+ * @param db The pointer to the source database.
+ * @param cl The client's index in the database.
+ * @param car The car's index in the database.
+ * @param op The operation's index in the database.
+ * @return \c obj_op_rm() with the proper paramaters.
+ * @retval 0 On success.
+ * @retval Non-zero On failure.
  */
 int db_op_rm(const struct database *db, idx cl, idx car, idx op)
 {
@@ -204,9 +305,11 @@ int db_op_rm(const struct database *db, idx cl, idx car, idx op)
         return obj_op_rm(car_, op);
 }
 
-/*
- * Deallocates a given database.
- * Returns 0 on success and error code on failure.
+/**
+ * @brief Deletes a database. Use this to clean up all allocated blocks.
+ * @param db The pointer to the database to be destroyed.
+ * @retval 0 On success
+ * @retval EINV If \c db is \c NULL .
  */
 int db_del(struct database *db)
 {

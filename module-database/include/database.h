@@ -1,5 +1,6 @@
-/*
- * database.h - defines database structure, include this to use the project database.
+/**
+ * @file database.h
+ * @brief Module header file. Include this to use the project database.
  */
 
 #ifndef REPAIRSHOP_DATABASE_H
@@ -8,10 +9,14 @@
 #include "objects.h"
 #include "vector.h"
 
+/**
+ * @struct database database.h
+ * @brief Primary data type used in cross-module data management.
+ */
 struct database {
-        char name[NAME_SIZE + 1];
-        char desc[DESC_SIZE + 1];
-        struct vector *cl;              /* database clients */
+        char name[NAME_SIZE + 1];       /**< The database's name */
+        char desc[DESC_SIZE + 1];       /**< The database's description. */
+        struct vector *cl;              /**< The database's client vector. */
 };
 
 struct database *db_init(const char *name, const char *desc);
@@ -32,7 +37,7 @@ int db_cl_mod(const struct database *db, idx cl, const char *name,
 int db_car_mod(const struct database *db, idx cl, idx car, const char *name,
         const char *plate);
 int db_op_mod(const struct database *db, idx cl, idx car, idx op,
-        const char *new_desc, double new_price, const char *new_date);
+        const char *desc, double price, const char *date);
 
 int db_cl_rm(const struct database *db, idx cl);
 int db_car_rm(const struct database *db, idx cl, idx car);

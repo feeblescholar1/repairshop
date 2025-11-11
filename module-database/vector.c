@@ -1,13 +1,23 @@
-/*
- * vector.c - generic vector implementation
+/**
+ * @file vector.c
+ * @brief Generic vector implementation.
+ * @details A vector implementation to manage an array of pointers. The managed
+ *          data can point to anything, that is why \c void** is used. The type
+ *          can also be different, however all data must be preallocated and
+ *          properly cast by the caller. Deallocation (to some extent) is
+ *          handled by the implementation, more specifically if the data inside
+ *          is not itself is dynamically allocated.\n
+ *          (e.g.: If there are nested vectors, the implementation doesn't know
+ *          that, so it cannot free it. Freeing that is the caller's
+ *          reponsibility.)
  */
 
 #include "include/vector.h"
 
-/*
- * Initializes a vector and return its pointer.
- * This does NOT initialize the array itself.
- * Returns NULL on failure.
+/**
+ * @brief Allocates and initializes a vector on the heap.
+ * @warning Does not initialize \c vector->items.
+ * @return A struct vector* on success and \c EMEMNULL on failure.
  */
 struct vector *vct(void)
 {
@@ -21,10 +31,15 @@ struct vector *vct(void)
         return new;
 }
 
-/*
- * Appends a pointer to the vector.
- * The given pointer must be allocated by the caller.
- * Use this function to initialize vec->items.
+/**
+ * @brief Appends a memory block pointer to a vector.
+ * @param v A vector pointer to add \c data to.
+ * @param data Pointer to a preallocated memory block.
+ * @retval 0 On success
+ * @retval EINV If \c v or \c data is \c NULL
+ * @retval EMALLOC If \c malloc() returns \c NULL.
+ * @retval EREALLOC If the vector expansion fails.
+ * @note Use to function to initialize \c v->items.
  */
 int vct_push(struct vector *v, void *data)
 {
@@ -52,20 +67,29 @@ int vct_push(struct vector *v, void *data)
         return 0;
 }
 
-/*
- * Checks if a given position is in vec->items.
- * For internal use only.
+/**
+ * @brief Checks if a given index exists in a vector.
+ * @param v Pointer to the source vector.
+ * @param pos The position to be checked.
+ * @return \c true if it's inbounds, \c false if not.
  */
 inline bool inbounds(const struct vector *v, idx pos)
 {
         return (pos < v->size);
 }
 
-/*
- * Insert a given pointer to the array into the given position.
- * Indexing starts from 0.
- * Unlike vector_push() this function CANNOT initialize vec–>items.
- * The given pointer must be allocated by the caller.
+/**
+ * @brief Inserts a memory block to a given position in a vector.
+ * @param v Pointer to the vector to insert the \c data to.
+ * @param data Pointer to a preallocated memory block.
+ * @param pos The position to insert \c data to.
+ * @warning This function CANNOT initialize \c v->items.\n
+ *          See \c vct_push() for that.
+ * @retval 0 On success.
+ * @retval EINV If \c v or \c data is \c NULL.
+ * @retval EOOB If the given \c pos is out of bounds.
+ * @retval EREALLOC If the vector expansion fails.
+ * @note Indexing starts from \c 0.
  */
 int vct_insert(struct vector *v, void *data, idx pos)
 {
@@ -94,10 +118,13 @@ int vct_insert(struct vector *v, void *data, idx pos)
         return 0;
 }
 
-/*
- * Returns a pointer from a given position.
- * Useful for obtaining subvectors.
- * The given pointer must not be freed. Use vct_rm() for that.
+/**
+ * @brief Returns a memory block pointer from a vector.
+ * @param v Pointer to the vector to get the subpointer from.
+ * @param pos Subpointer position.
+ * @retval void* On success.
+ * @retval NULL On failure.
+ * @note The given pointer must not be freed. Use \c vct_rm() for that.
  */
 void *vct_subptr(const struct vector *v, idx pos)
 {
@@ -107,9 +134,12 @@ void *vct_subptr(const struct vector *v, idx pos)
         return v->items[pos];
 }
 
-/*
- * Removes the last pointer from the array.
- * The allocated memory block is also freed.
+/**
+ * @brief Frees and removes the last memory block pointer from a vector.
+ * @param v Pointer to the source vector.
+ * @retval 0 On success.
+ * @retval EINV If \c v is \c NULL
+ * @return EREALLOC If the vector shrinking fails.
  */
 int vct_pop(struct vector *v)
 {
@@ -133,9 +163,14 @@ int vct_pop(struct vector *v)
         return 0;
 }
 
-/*
- * Removes a pointer from the array at the given position.
- * The allocated memory block is also freed.
+/**
+ * @brief Deallocates and removes a memory block pointer from a vector at the given position.
+ * @param v Pointer to the source vector.
+ * @param pos Position of the memory block pointer in \c v->items.
+ * @retval 0 On success.
+ * @retval EINV If \c v is \c NULL.
+ * @retval EOOB If \c pos is out of range.
+ * @retval REALLOC If the vector shrinking fails.
  */
 int vct_rm(struct vector *v, idx pos)
 {
@@ -167,9 +202,11 @@ int vct_rm(struct vector *v, idx pos)
         return 0;
 }
 
-/*
- * Removes all pointers from the array, then frees the vector pointer.
- * Frees all allocated memory blocks.
+/**
+ * @brief Frees all memory blocks and the vector.
+ * @param v Pointer to the vector to be deleted.
+ * @retval 0 On success.
+ * @retval EINV If \c v is \c NULL.
  */
 int vct_del(struct vector *v)
 {
