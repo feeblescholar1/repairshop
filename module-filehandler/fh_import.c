@@ -1,11 +1,42 @@
+/**
+ * @file fh_import.c
+ * @brief Function definitions to load a file into a database.
+ * @details The import process is based on the same hierarchical logic as the
+ *          database.\n The source file is parsed line-by-line. The program looks
+ *          for an ID char first (U, A or J), this marks the datatype. When the
+ *          datatype has been determined, the program will parse the string
+ *          accordingly. As for the linkage, the program will link all clients
+ *          to the destination database. As for the others they will link to
+ *          their last stored parent object.
+ * @warning The implementation does \b not check file or data integrity and
+ *          \b cannot detect intentional tampering with the source file.
+ */
+
 #include "include/fh.h"
 
-/*
- * A special database handler for importing operations.
- * This function parses two dates instead of one.
+/**
+ * @brief Adds an operation to a database.
+ * @details For the filehandler, a special operation import functions is needed,
+ *          since \c db_op_add() can only parse \c date_exp and generates
+ *          \c date_cr during runtime, which would produce inaccurate results,
+ *          since date of creation is \b not the current date and time. Most
+ *          likely, those operations were created much earlier. This fuction can
+ *          parse \c date_cr too to avoid that.
+ * @param db The pointer to destination database.
+ * @param cl The client's index in the database.
+ * @param car The car's index in the database.
+ * @param desc The operation's description.
+ * @param price The operation's price.
+ * @param date_cr A date string which will be parsed to \c date_cr .
+ * @param date_exp A date string which will be parsed to \c date_exp .
+ * @returns vct_push() - if the creation was sucessful.
+ * @retval 0 On success.
+ * @retval EMALLOC If the operation allocation fails.
+ * @note Dates should be in 'YYYY-MM-DD HH:MM' format (or 0 if not used).
+ * @note For all return values see \c vct_push.
  */
 int fh_db_op_add(struct database *db, idx cl, idx car, const char *desc,
-        double price, const char *date_cr, const char *date_exp)
+                 double price, const char *date_cr, const char *date_exp)
 {
         struct operation *op = malloc(sizeof(struct operation));
         if (!op)
@@ -27,7 +58,13 @@ int fh_db_op_add(struct database *db, idx cl, idx car, const char *desc,
         return vct_push(tmp->operations, op);
 }
 
-/* Parses str to a client structure and links it to dst */
+/**
+ * @brief Parses \c str to a client and links it to the database.
+ * @param dst The pointer to the destination database.
+ * @param str The string to be parsed.
+ * @return db_cl_add() - with the tokenized parameters
+ * @note The format of str should be: U>name|email|phone
+ */
 int fh_parse_client(struct database *dst, char *str)
 {
         char name[NAME_SIZE + 1] = "\0";
@@ -45,7 +82,14 @@ int fh_parse_client(struct database *dst, char *str)
         return db_cl_add(dst, name, email, phone);
 }
 
-/* Parses str to a car structure and links it to one of dst's clients. */
+/**
+ * @brief Parses \c str to a car structure and links it to the database.
+ * @param dst The pointer to the destination database.
+ * @param cl The client's index in the database.
+ * @param str The string to be parsed.
+ * @return db_car_add() - with the tokenized parameters
+ * @note The format of str should be: A>name|plate
+ */
 int fh_parse_car(struct database *dst, idx cl, char *str)
 {
         char name[NAME_SIZE + 1] = "\0";
@@ -59,7 +103,15 @@ int fh_parse_car(struct database *dst, idx cl, char *str)
         return db_car_add(dst, cl, name, plate);
 }
 
-/* Parses str to an operation structure and links it to one of dst's cars */
+/**
+ * @brief Parses \c str to an operation structure and links it to the database.
+ * @param dst The pointer to the destination database.
+ * @param cl The client's index in the database.
+ * @param car The car's index in the database.
+ * @param str The string to be parsed.
+ * @return db_car_add() - with the tokenized parameters
+ * @note The format of str should be: J>desc|plate|date_cr|date_exp
+ */
 int fh_parse_op(struct database *dst, idx cl, idx car, char *str)
 {
         char desc[DESC_SIZE + 1] = "\0";
@@ -78,10 +130,13 @@ int fh_parse_op(struct database *dst, idx cl, idx car, char *str)
         return fh_db_op_add(dst, cl, car, desc, price, date_cr, date_exp);
 }
 
-/*
- * f(ile)h(andler)_import - opens up export.txt for reading and fills a db
- * The database hierarchy is client > car > operation (tokens: U > A > J).
- * Every object must have a direct parent (for clients it's the database).
+/**
+ * @brief Imports \c export.txt into a database.
+ * @param dst The pointer to the destination database.
+ * @retval 0 On success.
+ * @retval EFPERM If the file cannot be opened for reading.
+ * @retval EMALLOC If the database expansion fails.
+ * @warning The destination database must be initilazed with \c db_init() first.
  */
 int fh_import(struct database *dst)
 {
@@ -99,6 +154,11 @@ int fh_import(struct database *dst)
 
                 /* check the char ID */
                 switch (read_buffer[0]) {
+                        case 'D':
+                                strtok(read_buffer, ">");
+                                strcpy(dst->name, strtok(NULL, "|"));
+                                strcpy(dst->desc, strtok(NULL, "|"));
+                                break;
                         case 'U':
                                 r = fh_parse_client(dst, read_buffer);
                                 if (r == EMALLOC)

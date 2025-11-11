@@ -1,10 +1,13 @@
-/*
- * interface.c - mainloop UI
+/**
+ * @file intf.c
+ * @brief Mainloop UI code.
  */
 
 #include "include/intf.h"
 
-/* Walls of text */
+/**
+ * @brief Prints the main menu's text to \c stdout .
+ */
 void intf_main_txt()
 {
         puts("\n-------------- carrepairshop --------------");
@@ -15,7 +18,12 @@ void intf_main_txt()
         printf("Opcio: ");
 }
 
-/* Mainloop driver code */
+/**
+ * @brief The main menu's driver code.
+ * @param db The database pointer which the user will address.
+ * @retval 0 If the user requests the program to exit.
+ * @retval EMALLOC If a memory allocation failure is occured.
+ */
 int intf_main(struct database *db)
 {
         bool mainloop_active = true;

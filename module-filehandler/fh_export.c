@@ -1,19 +1,45 @@
+/**
+ * @file fh_export.c
+ * @brief Function definitions for exporting a database into a txt file.
+ * @details The exporting is performed by interating through the database and
+ *          writing out all data by datatype to new line, with and ID char and
+ *          its contents separated by a pipe (|).\n
+ *          ID char: \c U - for clients, \c A - for cars and \c J - for operations.
+ *          The ID char is followed by a \c > instead of a \c |.
+ * @note The first line is the database name and description with the ID of \c D
+ */
+
 #include "include/fh.h"
 
-/* Exports client in the following format: U>name|email|phone */
+/**
+ * @brief Exports a client to a file in the following format: U>name|email|phone
+ * @param client Pointer to the client structure to be exported.
+ * @param target Pointer to target file.
+ */
 void fh_client_export(struct client *client, FILE *target)
 {
         fprintf(target, "U>%s|%s|%s\n", client->name, client->email,
                  client->phone);
 }
 
-/* Exports car in the following format: A>name|plate */
+/**
+ * @brief Exports a car to a file in the following format: A>name|plate
+ * @param car Pointer to the car structure to be exported.
+ * @param target Pointer to target file.
+ */
 void fh_car_export(struct car *car, FILE *target)
 {
         fprintf(target, "A>%s|%s\n", car->name, car->plate);
 }
 
-/* Exports car in the following format: J>desc|price|date_cr|date_exp */
+/**
+ * @brief Exports an operation to a file in the following format:\n
+ *        U>description|price|date_cr|date_exp
+ * @param op Pointer to the operation structure to be exported.
+ * @param target Pointer to target file.
+ * @note  If \c date_exp is uninintialized (marked by \c date_exp.y being \c 0)
+ *        the function will write a \c 0 in place of \c date_exp to indicate that.
+ */
 void fh_op_export(struct operation *op, FILE *target)
 {
         fprintf(target, "J>%s|%f|%d-%02d-%02d %02d:%02d|", op->desc,
@@ -28,15 +54,20 @@ void fh_op_export(struct operation *op, FILE *target)
                 fprintf(target, "0\n");
 }
 
-/*
- * f(ile)h(andler) export - exports db to export.txt
- * The export formats can be found in the comments above.
+/**
+ * @brief Exports a database to file called \c export.txt .
+ * @param db Pointer to the database to be exported.
+ * @retval 0 On success.
+ * @retval EFPERM If the file cannot be opened for writing.
+ * @note If \c export.txt doesn't exsist, this function creates it.
  */
 int fh_export(const struct database *db)
 {
         FILE *target = fopen("export.txt", "w");
         if (!target)
                 return EFPERM;
+
+        fprintf(target, "D>%s|%s\n", db->name, db->desc);
 
         for (idx i = 0; i < db->cl->size; i++) {
                 struct client *client = db_cl_get(db, i);

@@ -1,5 +1,8 @@
 #include "include/intf_search.h"
 
+/**
+ * @brief Prints the search menu's text to \c stdout .
+ */
 void intf_search_txt()
 {
         puts("\n----- Kereses -----");
@@ -9,6 +12,12 @@ void intf_search_txt()
         puts("-------------------");
 }
 
+/**
+ * @brief The search menu's driver code.
+ * @param db The database pointer which the user will address.
+ * @retval 0 If the user requests to go back.
+ * @retval EMALLOC If a memory allocation failure is occured.
+ */
 int intf_search(struct database *db)
 {
 
@@ -42,6 +51,12 @@ int intf_search(struct database *db)
         return 0;
 }
 
+/**
+ * Frontend for user search by client name.
+ * @param db The database pointer which the user will search in.
+ * @retval 0 On success.
+ * @retval EMALLOC If a memory allocation failure is occured.
+ */
 int intf_search_cl(struct database *db)
 {
         /* Ask for the term */
@@ -79,7 +94,12 @@ int intf_search_cl(struct database *db)
         return 0;
 }
 
-
+/**
+ * Frontend for user search by car plate number.
+ * @param db The database pointer which the user will search in.
+ * @retval 0 On success.
+ * @retval EMALLOC If a memory allocation failure is occured.
+ */
 int intf_search_plate(struct database *db)
 {
         /* Ask for the term */

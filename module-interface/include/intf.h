@@ -1,5 +1,6 @@
-/*
- * interface.h - include this to use the project ui
+/**
+ * @file intf.h
+ * @brief Module header file. Include this for the user interface.
  */
 #ifndef REPAIRSHOP_INTF_H
 #define REPAIRSHOP_INTF_H

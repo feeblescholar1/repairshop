@@ -1,8 +1,12 @@
-/*
- * interface_client.c - client submenu
+/**
+ * @file intf_client.c
+ * @brief The client management menu's UI code.
  */
 #include "include/intf_client.h"
 
+/**
+ * @brief Prints the client management menu's text to \c stdout .
+ */
 void intf_cl_txt(const struct database *db)
 {
         puts("\n------------------ Ugyfelek kezelese ------------------");
@@ -28,6 +32,12 @@ void intf_cl_txt(const struct database *db)
         printf("\nOpcio: ");
 }
 
+/**
+ * @brief The client management menu's driver code.
+ * @param db The database pointer which the user will address.
+ * @retval 0 If the user requests to go back.
+ * @retval EMALLOC If a memory allocation failure is occured.
+ */
 int intf_cl(const struct database *db)
 {
         bool submenu_active = true;
@@ -79,6 +89,12 @@ int intf_cl(const struct database *db)
         }
         return 0;
 }
+
+/**
+ * @brief The frontend for client addition.
+ * @param db The destination database.
+ * @return \c db_cl_add() with the user given parameters.
+ */
 int intf_cl_add(const struct database *db)
 {
         char name[NAME_SIZE + 1] = "\0";
@@ -97,6 +113,12 @@ int intf_cl_add(const struct database *db)
         return db_cl_add(db, name, email, phone);
 }
 
+/**
+ * @brief The frontend for client modification.
+ * @param db The destination database.
+ * @param cl The client's index.
+ * @return \c db_cl_mod() with the user given parameters.
+ */
 int intf_cl_mod(const struct database *db, idx cl)
 {
         char name[NAME_SIZE + 1] = "\0";
@@ -115,6 +137,13 @@ int intf_cl_mod(const struct database *db, idx cl)
 
         return db_cl_mod(db, cl, name, email, phone);
 }
+
+/**
+ * @brief The frontend for client removal.
+ * @param db The destination database.
+ * @param cl The client's index.
+ * @return \c db_cl_rm() with the user given parameters.
+ */
 int interface_client_rm(const struct database *db, idx cl)
 {
         return obj_cl_rm(db->cl, cl);

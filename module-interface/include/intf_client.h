@@ -1,3 +1,8 @@
+/**
+ * @file intf_client.h
+ * @brief Header for client UI functions.
+ */
+
 #ifndef REPAIRSHOP_INTF_CLIENT_H
 #define REPAIRSHOP_INTF_CLIENT_H
 

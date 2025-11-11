@@ -1,5 +1,13 @@
+/**
+ * @file intf_car.c
+ * @brief The car/operation management menu's UI code.
+ */
+
 #include "include/intf_car.h"
 
+/**
+ * @brief Prints the car/operation management menu's text to \c stdout .
+ */
 void intf_car_txt(const struct database *db, idx cl)
 {
         struct client *cl_ = db_cl_get(db, cl);
@@ -47,7 +55,14 @@ void intf_car_txt(const struct database *db, idx cl)
 
 }
 
-
+/**
+ * @brief The car/operation management menu's driver code.
+ * @param db The database pointer which the user will address.
+ * @param cl The index of the client, who the user will manage.
+ * @retval 0 If the user requests to go back.
+ * @retval EOOB If the user requested a client, who doesn't exist in the database.
+ * @retval EMALLOC If a memory allocation failure is occured.
+ */
 int intf_car(const struct database *db, idx cl)
 {
         if (db_cl_get(db, cl) == NULL)
@@ -126,6 +141,12 @@ int intf_car(const struct database *db, idx cl)
         return 0;
 }
 
+/**
+ * @brief The frontend for car addition.
+ * @param db The destination database.
+ * @param cl The client's index in the database, which the user currenly manages.
+ * @return \c db_car_add() with the user given parameters.
+ */
 int intf_car_add(const struct database *db, idx cl)
 {
         char name_buffer[NAME_SIZE + 1] = "\0";
@@ -140,6 +161,13 @@ int intf_car_add(const struct database *db, idx cl)
         return db_car_add(db, cl, name_buffer, plate_buffer);
 }
 
+/**
+ * @brief The frontend for operation addition.
+ * @param db The destination database.
+ * @param cl The client's index in the database, which the user currenly manages.
+ * @param car The car's index in the database.
+ * @return \c db_op_add() with the user given parameters.
+ */
 int intf_op_add(const struct database *db, idx cl, idx car)
 {
         if (db_car_get(db, cl, car) == NULL)
@@ -166,6 +194,12 @@ int intf_op_add(const struct database *db, idx cl, idx car)
         return db_op_add(db, cl, car, desc_buffer, price, date_buffer);
 }
 
+/**
+ * @brief The frontend for car modification.
+ * @param db The destination database.
+ * @param cl The client's index in the database, which the user currenly manages.
+ * @return \c db_car_mod() with the user given parameters.
+ */
 int intf_car_mod(const struct database *db, idx cl, idx car)
 {
         char name_buffer[NAME_SIZE + 1] = "\0";
@@ -181,11 +215,16 @@ int intf_car_mod(const struct database *db, idx cl, idx car)
         return db_car_mod(db, cl, car, name_buffer, plate_buffer);
 }
 
+/**
+ * @brief The frontend for operation addition.
+ * @param db The destination database.
+ * @param cl The client's index in the database, which the user currenly manages.
+ * @param car The car's index in the database.
+ * @param op The operation's index in the database.
+ * @return \c db_op_mod() with the user given parameters.
+ */
 int intf_op_mod(const struct database *db, idx cl, idx car, idx op)
 {
-        if (db_car_get(db, cl, car) == NULL)
-                return EOOB;
-
         char desc_buffer[DESC_SIZE + 1] = "\0";
         char price_buffer[DEFAULT_BUF_SIZE + 1] = "\0";
         double price = 0;
@@ -200,11 +239,26 @@ int intf_op_mod(const struct database *db, idx cl, idx car, idx op)
         return db_op_mod(db, cl, car, op, desc_buffer, price, NULL);
 }
 
+/**
+ * @brief The frontend for car removal.
+ * @param db The destination database.
+ * @param cl The client's index in the database, which the user currenly manages.
+ * @param car The car's index in the database.
+ * @return \c db_car_rm() with the user given parameters.
+ */
 int intf_car_rm(const struct database *db, idx cl, idx car)
 {
         return db_car_rm(db, cl, car);
 }
 
+/**
+ * @brief The frontend for operation removal.
+ * @param db The destination database.
+ * @param cl The client's index in the database, which the user currenly manages.
+ * @param car The car's index in the database.
+ * @param op The operation's index in the database.
+ * @return \c db_op_add() with the user given parameters.
+ */
 int intf_op_rm(const struct database *db, idx cl, idx car, const idx op)
 {
         return db_op_rm(db, cl, car, op);

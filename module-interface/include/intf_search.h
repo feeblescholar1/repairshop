@@ -1,3 +1,8 @@
+/**
+ * @file intf_search.h
+ * @brief Header for user search UI.
+ */
+
 #ifndef REPAIRSHOP_INTF_SEARCH_H
 #define REPAIRSHOP_INTF_SEARCH_H
 

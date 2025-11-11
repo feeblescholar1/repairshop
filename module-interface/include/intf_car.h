@@ -1,3 +1,8 @@
+/**
+ * @file intf_car.h
+ * @brief Header for car UI functions.
+ */
+
 #ifndef REPAIRSHOP_INTF_CAR_H
 #define REPAIRSHOP_INTF_CAR_H
 
