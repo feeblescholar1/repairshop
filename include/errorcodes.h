@@ -1,15 +1,16 @@
-/*
- * errorcodes.h - project error codes
+/**
+ * @file errorcodes.h
+ * @brief Project error codes. Chosen at random.
  */
 
 #ifndef REPAIRSHOP_ERRORCODES_H
 #define REPAIRSHOP_ERRORCODES_H
 
-#define EMEMNULL NULL   /* malloc fails */
-#define EINV (-1)       /* invalid function parameter */
-#define EOOB 1          /* out of bounds */
-#define EMALLOC 2       /* malloc fails */
-#define EREALLOC 3      /* realloc fails */
-#define EFPERM 4        /* file permission error */
+#define EMEMNULL NULL   /**< \c malloc() fails */
+#define EINV (-1)       /**< Invalid function parameter */
+#define EOOB 1          /**< Out of bounds error */
+#define EMALLOC 2       /**< \c malloc() fails */
+#define EREALLOC 3      /**< \c realloc() fails */
+#define EFPERM 4        /**< File permission error */
 
 #endif //REPAIRSHOP_ERRORCODES_H

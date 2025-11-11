@@ -13,16 +13,54 @@
 #include "module-filehandler/include/fh.h"
 
 /**
+ * @brief Prints out an error message to \c stderr .
+ * @param err_code An errorcode defined in \c errorcodes.h
+ * @return The \c err_code parameter.
+ */
+int err_msg(int err_code)
+{
+        switch (err_code) {
+                case EMALLOC:
+                case EREALLOC:
+                        fprintf(stderr, "Memoriakezelesi hiba. Kilepes...\n");
+                        break;
+                case EFPERM:
+                        fprintf(stderr, "A faljt nem lehet megnyitni irasra.");
+                        break;
+                default:
+                        break;
+        }
+
+        return err_code;
+}
+
+/**
  * @brief The (fake) program entry. We all know that the program starts at
  *        the label \c _start . Documented for completeness’ sake.
- * @return Returns 0 on success and whatever error code the modules throw.
+ * @return Returns 0 on success or whatever error code the modules throw.
  */
 int main(void)
 {
         struct database *db = db_init("", "");
-        fh_import(db);  /* import the database from export.txt */
-        intf_main(db);  /* call the mainloop */
-        fh_export(db);  /* export the database into export.txt */
-        db_del(db);     /* clean up the allocated memory */
+
+        int err_code = 0;
+
+        err_code = fh_import(db);
+        if (err_code == EMALLOC)
+                goto cleanup;
+
+        err_code = intf_main(db);
+        if (err_code)
+                goto cleanup;
+
+        err_code = fh_export(db);
+        if (err_code)
+                goto cleanup;
+
+        err_code = db_del(db);
         return 0;
+
+        cleanup:
+                db_del(db);
+                return err_msg(err_code);
 }
