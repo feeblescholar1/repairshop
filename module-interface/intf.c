@@ -30,7 +30,6 @@ int intf_main(struct database *db)
 {
         bool mainloop_active = true;
         while (mainloop_active) {
-                setbuf(stdout, NULL);
                 intf_main_txt(db);
                 int opt = intf_io_opt();
                 int resp = 0;

@@ -164,6 +164,7 @@ int obj_car_mod(struct car *src, const char *name, const char *plate)
  * @param date The operation's new expiration data.
  * @warning String parameters are not validated, it is the caller's
  *          responsibility to make sure they fit into the structure.
+ * @note Does not modify \c op->date_cr .
  * @retval 0 On success.
  * @retval EINV If \c src is \c NULL .
  */
@@ -175,11 +176,12 @@ int obj_mod(struct operation *src, const char *desc, double price,
 
         strcpy(src->desc, desc);
         src->price = price;
-        if (!date)
-                src->date_cr = date_now();
-        else {
-                src->date_cr = date_parse(date);
-        }
+        if (date)
+                src->date_exp = date_parse(date);
+        else
+                /* Set the first element to 0 to know this is not used. */
+                src->date_exp.y = 0;
+
 
         return 0;
 }

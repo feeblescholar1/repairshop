@@ -228,6 +228,7 @@ int intf_op_mod(const struct database *db, idx cl, idx car, idx op)
         char desc_buffer[DESC_SIZE + 1] = "\0";
         char price_buffer[DEFAULT_BUF_SIZE + 1] = "\0";
         double price = 0;
+        char date_buffer[DEFAULT_BUF_SIZE + 1] = "\0";
 
         printf("Javitas leirasa (max. %d karakter): ", DESC_SIZE);
         intf_io_fgets(desc_buffer, DESC_SIZE + 1);
@@ -236,7 +237,13 @@ int intf_op_mod(const struct database *db, idx cl, idx car, idx op)
         intf_io_fgets(price_buffer, DEFAULT_BUF_SIZE + 1);
         price = strtod(price_buffer, NULL);
 
-        return db_op_mod(db, cl, car, op, desc_buffer, price, NULL);
+        printf("Vizsga eseten ervenyesseg lejarta (formatum: EEEE-HH-NN OO-PP): ");
+        intf_io_fgets(date_buffer, DEFAULT_BUF_SIZE + 1);
+
+        if (date_buffer[0] == '\n')
+                return db_op_mod(db, cl, car, op, desc_buffer, price, NULL);
+
+        return db_op_mod(db, cl, car, op, desc_buffer, price, date_buffer);
 }
 
 /**

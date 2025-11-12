@@ -40,7 +40,8 @@ int err_msg(int err_code)
  */
 int main(void)
 {
-        struct database *db = db_init("", "");
+        setbuf(stdout, NULL);
+        struct database *db = db_init("(nincs nev)", "(nincs leiras)\n");
 
         int err_code = 0;
 
@@ -56,7 +57,7 @@ int main(void)
         if (err_code)
                 goto cleanup;
 
-        err_code = db_del(db);
+        db_del(db);
         return 0;
 
         cleanup:

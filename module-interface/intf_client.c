@@ -68,7 +68,7 @@ int intf_cl(const struct database *db)
                                 printf("Ugyfelazonosito: ");
                                 opt = intf_io_opt();
 
-                                resp = interface_client_rm(db, opt);
+                                resp = intf_client_rm(db, opt);
                                 if (resp == EOOB)
                                         puts("\nAz ugyfel nem talalhato.");
                                 break;
@@ -144,7 +144,7 @@ int intf_cl_mod(const struct database *db, idx cl)
  * @param cl The client's index.
  * @return \c db_cl_rm() with the user given parameters.
  */
-int interface_client_rm(const struct database *db, idx cl)
+int intf_client_rm(const struct database *db, idx cl)
 {
         return obj_cl_rm(db->cl, cl);
 }
