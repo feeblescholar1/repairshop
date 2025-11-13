@@ -26,7 +26,7 @@ void intf_io_fgets(char *buffer, size_t size)
  * @brief Gets \c option from the user. Used in interface driver codes.
  * @return The option, that user have entered.
  */
-int intf_io_opt()
+int intf_io_opt(void)
 {
         int opt = -1;
         char input_buf[DEFAULT_BUF_SIZE + 1] = "\0";

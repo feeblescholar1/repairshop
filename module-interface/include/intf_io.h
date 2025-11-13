@@ -16,6 +16,6 @@
 #define DEFAULT_BUF_SIZE 32
 
 void intf_io_fgets(char *buffer, size_t size);
-int intf_io_opt();
+int intf_io_opt(void);
 
 #endif //REPAIRSHOP_INTF_IO_H
