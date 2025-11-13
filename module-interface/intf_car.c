@@ -152,10 +152,10 @@ int intf_car_add(const struct database *db, idx cl)
         char name_buffer[NAME_SIZE + 1] = "\0";
         char plate_buffer[PLATE_SIZE + 1] = "\0";
 
-        printf("Auto tipusa (max. %d karakter): ", NAME_SIZE);
+        printf("Auto tipusa (max. %d karakter, formatum: nincs): ", NAME_SIZE);
         intf_io_fgets(name_buffer, NAME_SIZE + 1);
 
-        printf("Auto rendszama (max. %d karakter): ", PLATE_SIZE);
+        printf("Auto rendszama (max. %d karakter, formatum: ABCD123): ", PLATE_SIZE);
         intf_io_fgets(plate_buffer, PLATE_SIZE + 1);
 
         return db_car_add(db, cl, name_buffer, plate_buffer);
@@ -178,10 +178,11 @@ int intf_op_add(const struct database *db, idx cl, idx car)
         char date_buffer[DEFAULT_BUF_SIZE + 1] = "\0";
         double price = 0;
 
-        printf("Javitas/vizsga leirasa (max. %d karakter): ", DESC_SIZE);
+        printf("Javitas/vizsga leirasa (max. %d karakter, formatum: nincs): ",
+                DESC_SIZE);
         intf_io_fgets(desc_buffer, DESC_SIZE + 1);
 
-        printf("Javitas/vizsga koltsege: ");
+        printf("Javitas/vizsga (forintban, formatum: csak szam): ");
         intf_io_fgets(price_buffer, DEFAULT_BUF_SIZE + 1);
         price = strtod(price_buffer, NULL);
 
@@ -233,7 +234,7 @@ int intf_op_mod(const struct database *db, idx cl, idx car, idx op)
         printf("Javitas leirasa (max. %d karakter): ", DESC_SIZE);
         intf_io_fgets(desc_buffer, DESC_SIZE + 1);
 
-        puts("Javitas koltsege (forintban): ");
+        puts("Javitas koltsege (forintban, formatum: csak szam): ");
         intf_io_fgets(price_buffer, DEFAULT_BUF_SIZE + 1);
         price = strtod(price_buffer, NULL);
 

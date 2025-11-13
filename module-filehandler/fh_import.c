@@ -158,6 +158,7 @@ int fh_import(struct database *dst)
                                 strtok(read_buffer, ">");
                                 strcpy(dst->name, strtok(NULL, "|"));
                                 strcpy(dst->desc, strtok(NULL, "|"));
+                                dst->desc[strcspn(dst->desc, "\r\n")] = '\0';
                                 break;
                         case 'U':
                                 r = fh_parse_client(dst, read_buffer);

@@ -42,8 +42,11 @@ struct date date_now(void)
 struct date date_parse(const char *str)
 {
         struct date ret;
-        sscanf(str, "%d-%d-%d %d:%d", &ret.y, &ret.mon, &ret.d, &ret.h,
-                &ret.min);
+        if (sscanf(str, "%d-%d-%d %d:%d", &ret.y, &ret.mon, &ret.d, &ret.h,
+                &ret.min) != 5)
+        {
+                ret.y = 0;
+        }
 
         return ret;
 }
