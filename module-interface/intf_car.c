@@ -65,90 +65,87 @@ void intf_car_txt(const struct database *db, idx cl)
  */
 int intf_car(const struct database *db, idx cl)
 {
-        if (db_cl_get(db, cl) == NULL)
+        if (!db_cl_get(db, cl))
                 return EOOB;
 
-        bool submenu_active = true;
-        while (submenu_active) {
+        bool menu_active = true;
+        while (menu_active) {
                 intf_car_txt(db, cl);
-                int opt = intf_io_opt();
-                int opt2 = 0;
-                int response = 0;
+                int s = intf_io_opt();
+                int s2 = 0;
+                int retval = 0;
 
-                switch (opt) {
+                switch (s) {
                         case 0:
-                                submenu_active = false;
+                                menu_active = false;
                                 break;
                         case 1:
-                                response = intf_car_add(db, cl);
-                                if (response == EMALLOC)
-                                        return EMALLOC;
+                                retval = intf_car_add_mod(db, cl, false, 0);
                                 break;
                         case 2:
                                 printf("Auto sorszama: ");
-                                opt = intf_io_opt();
+                                s = intf_io_opt();
 
-                                response = intf_car_mod(db, cl, opt);
-                                if (response == EOOB)
-                                        puts("\nAz auto nem talalhato");
+                                retval = intf_car_add_mod(db, cl, true, s);
                                 break;
                         case 3:
                                 printf("Auto sorszama: ");
-                                opt = intf_io_opt();
+                                s = intf_io_opt();
 
-                                response = intf_car_rm(db, cl, opt);
-                                if (response == EOOB)
-                                        puts("\nAz auto nem talalhato");
+                                retval = db_car_rm(db, cl, s);
                                 break;
                         case 4:
                                 printf("Auto sorszama: ");
-                                opt = intf_io_opt();
+                                s = intf_io_opt();
 
-                                response = intf_op_add(db, cl, opt);
-                                if (response == EOOB)
-                                        puts("\nAz auto nem talalhato.");
-                                else if (response == EMALLOC)
-                                        return EMALLOC;
+                                retval = intf_op_add_mod(db, cl, s, false, 0);
                                 break;
                         case 5:
                                 printf("Auto sorszama: ");
-                                opt = intf_io_opt();
+                                s = intf_io_opt();
 
                                 printf("Javitas sorszama: ");
-                                opt2 = intf_io_opt();
+                                s2 = intf_io_opt();
 
-                                response = intf_op_mod(db, cl, opt,opt2);
-                                if (response == EOOB)
-                                        puts("\nAz elem nem talalhato.");
+                                retval = intf_op_add_mod(db, cl, s, true, s2);
                                 break;
 
                         case 6:
                                 printf("Auto sorszama: ");
-                                opt = intf_io_opt();
+                                s = intf_io_opt();
 
                                 printf("Javitas sorszama: ");
-                                opt2 = intf_io_opt();
+                                s2 = intf_io_opt();
 
-                                response = intf_op_rm(db, cl, opt, opt2);
-                                if (response == EOOB)
-                                        puts("\nAz elem nem talalhato.");
+                                retval = db_op_rm(db, cl, s, s2);
                                 break;
                         default:
                                 puts("\nErvenytelen opcio.\n");
                                 break;
                 }
+
+                if (retval == EMALLOC)
+                        return EMALLOC;
+
+                if (retval == EOOB)
+                        puts("\nAz auto/javitas nem talalhato.");
         }
         return 0;
 }
 
 /**
- * @brief The frontend for car addition.
+ * @brief The frontend for car addition/modification.
  * @param db The destination database.
  * @param cl The client's index in the database, which the user currenly manages.
+ * @param mod Set to true if the user requests modification.
+ * @param car The car's index if \c mod is \c true .
  * @return \c db_car_add() with the user given parameters.
  */
-int intf_car_add(const struct database *db, idx cl)
+int intf_car_add_mod(const struct database *db, idx cl, bool mod, idx car)
 {
+        if (mod && !db_car_get(db, cl, car))
+                return EOOB;
+
         char name_buffer[NAME_SIZE + 1] = "\0";
         char plate_buffer[PLATE_SIZE + 1] = "\0";
 
@@ -158,19 +155,25 @@ int intf_car_add(const struct database *db, idx cl)
         printf("Auto rendszama (max. %d karakter, formatum: ABCD123): ", PLATE_SIZE);
         intf_io_fgets(plate_buffer, PLATE_SIZE + 1);
 
+        if (mod)
+                return db_car_mod(db, cl, car, name_buffer, plate_buffer);
+
         return db_car_add(db, cl, name_buffer, plate_buffer);
 }
 
 /**
- * @brief The frontend for operation addition.
+ * @brief The frontend for operation addition/modification.
  * @param db The destination database.
  * @param cl The client's index in the database, which the user currenly manages.
  * @param car The car's index in the database.
+ * @param mod Set to true if the user requests modification.
+ * @param op The operation's index if \c mod is \c true .
  * @return \c db_op_add() with the user given parameters.
  */
-int intf_op_add(const struct database *db, idx cl, idx car)
+int intf_op_add_mod(const struct database *db, idx cl, idx car, bool mod,
+                        idx op)
 {
-        if (db_car_get(db, cl, car) == NULL)
+        if (!db_car_get(db, cl, car) || (mod && !db_op_get(db, cl, car, op)))
                 return EOOB;
 
         char desc_buffer[DESC_SIZE + 1] = "\0";
@@ -189,85 +192,17 @@ int intf_op_add(const struct database *db, idx cl, idx car)
         printf("Vizsga eseten ervenyesseg lejarta (formatum: EEEE-HH-NN OO-PP): ");
         intf_io_fgets(date_buffer, DEFAULT_BUF_SIZE + 1);
 
+        if (mod) {
+                if (date_buffer[0] == '\n')
+                        return db_op_mod(db, cl, car, op, desc_buffer, price,
+                                         NULL);
+
+                return db_op_mod(db, cl, car, op, desc_buffer, price,
+                                 date_buffer);
+        }
+
         if (date_buffer[0] == '\n')
                 return db_op_add(db, cl, car, desc_buffer, price, NULL);
 
         return db_op_add(db, cl, car, desc_buffer, price, date_buffer);
-}
-
-/**
- * @brief The frontend for car modification.
- * @param db The destination database.
- * @param cl The client's index in the database, which the user currenly manages.
- * @return \c db_car_mod() with the user given parameters.
- */
-int intf_car_mod(const struct database *db, idx cl, idx car)
-{
-        char name_buffer[NAME_SIZE + 1] = "\0";
-        char plate_buffer[PLATE_SIZE + 1] = "\0";
-
-        printf("Auto tipusa (max. %d karakter): ", NAME_SIZE);
-        intf_io_fgets(name_buffer, NAME_SIZE + 1);
-
-        printf("Auto rendszama (max. %d karakter, formatum: ABC123 vagy ABCD123): ",
-                PLATE_SIZE);
-        intf_io_fgets(plate_buffer, PLATE_SIZE + 1);
-
-        return db_car_mod(db, cl, car, name_buffer, plate_buffer);
-}
-
-/**
- * @brief The frontend for operation addition.
- * @param db The destination database.
- * @param cl The client's index in the database, which the user currenly manages.
- * @param car The car's index in the database.
- * @param op The operation's index in the database.
- * @return \c db_op_mod() with the user given parameters.
- */
-int intf_op_mod(const struct database *db, idx cl, idx car, idx op)
-{
-        char desc_buffer[DESC_SIZE + 1] = "\0";
-        char price_buffer[DEFAULT_BUF_SIZE + 1] = "\0";
-        double price = 0;
-        char date_buffer[DEFAULT_BUF_SIZE + 1] = "\0";
-
-        printf("Javitas leirasa (max. %d karakter): ", DESC_SIZE);
-        intf_io_fgets(desc_buffer, DESC_SIZE + 1);
-
-        puts("Javitas koltsege (forintban, formatum: csak szam): ");
-        intf_io_fgets(price_buffer, DEFAULT_BUF_SIZE + 1);
-        price = strtod(price_buffer, NULL);
-
-        printf("Vizsga eseten ervenyesseg lejarta (formatum: EEEE-HH-NN OO-PP): ");
-        intf_io_fgets(date_buffer, DEFAULT_BUF_SIZE + 1);
-
-        if (date_buffer[0] == '\n')
-                return db_op_mod(db, cl, car, op, desc_buffer, price, NULL);
-
-        return db_op_mod(db, cl, car, op, desc_buffer, price, date_buffer);
-}
-
-/**
- * @brief The frontend for car removal.
- * @param db The destination database.
- * @param cl The client's index in the database, which the user currenly manages.
- * @param car The car's index in the database.
- * @return \c db_car_rm() with the user given parameters.
- */
-int intf_car_rm(const struct database *db, idx cl, idx car)
-{
-        return db_car_rm(db, cl, car);
-}
-
-/**
- * @brief The frontend for operation removal.
- * @param db The destination database.
- * @param cl The client's index in the database, which the user currenly manages.
- * @param car The car's index in the database.
- * @param op The operation's index in the database.
- * @return \c db_op_add() with the user given parameters.
- */
-int intf_op_rm(const struct database *db, idx cl, idx car, const idx op)
-{
-        return db_op_rm(db, cl, car, op);
 }

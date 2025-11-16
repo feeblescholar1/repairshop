@@ -25,31 +25,27 @@ void intf_main_txt(struct database *db)
 
 /**
  * @brief The main menu's driver code.
- * @param db The database pointer which the user will address.
+ * @param db Ponter to the database which the user will address.
  * @retval 0 If the user requests the program to exit.
  * @retval EMALLOC If a memory allocation failure is occured.
  */
 int intf_main(struct database *db)
 {
-        bool mainloop_active = true;
-        while (mainloop_active) {
+        bool menu_active = true;
+        while (menu_active) {
                 intf_main_txt(db);
-                int opt = intf_io_opt();
-                int resp = 0;
+                int s = intf_io_opt();
+                int retval = 0;
 
-                switch (opt) {
+                switch (s) {
                         case 0:
-                                mainloop_active = false;
+                                menu_active = false;
                                 break;
                         case 1:
-                                resp = intf_cl(db);
-                                if (resp == EMALLOC)
-                                        return EMALLOC;
+                                retval = intf_cl(db);
                                 break;
                         case 2:
-                                resp = intf_search(db);
-                                if (resp == EMALLOC)
-                                        return EMALLOC;
+                                retval = intf_search(db);
                                 break;
                         case 3:
                                 intf_db_namechange(db);
@@ -59,6 +55,9 @@ int intf_main(struct database *db)
                                 puts("Nincs ilyen opcio.");
                                 break;
                 }
+
+                if (retval == EMALLOC)
+                        return EMALLOC;
         }
 
         return 0;

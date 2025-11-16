@@ -12,13 +12,8 @@
 void intf_car_txt(const struct database *db, idx cl);
 int intf_car(const struct database *db, idx cl);
 
-int intf_car_add(const struct database *db, idx cl);
-int intf_op_add(const struct database *db, idx cl, idx car);
-
-int intf_car_mod(const struct database *db, idx cl, idx car);
-int intf_op_mod(const struct database *db, idx cl, idx car, idx op);
-
-int intf_car_rm(const struct database *db, idx cl, idx car);
-int intf_op_rm(const struct database *db, idx cl, idx car, idx op);
+int intf_car_add_mod(const struct database *db, idx cl, bool mod, idx car);
+int intf_op_add_mod(const struct database *db, idx cl, idx car, bool mod,
+                        idx op);
 
 #endif //REPAIRSHOP_INTF_CAR_H

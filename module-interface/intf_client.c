@@ -43,60 +43,61 @@ int intf_cl(const struct database *db)
         bool submenu_active = true;
         while (submenu_active) {
                 intf_cl_txt(db);
-                int opt = intf_io_opt();
-                int resp = 0;
+                int s = intf_io_opt();
+                int retval = 0;
 
-                switch (opt) {
+                switch (s) {
                         case 0:
                                 submenu_active = false;
                                 break;
                         case 1:
-                                resp = intf_cl_add(db);
-                                if (resp == EMALLOC)
-                                        return EMALLOC;
+                                retval = intf_cl_add_mod(db, false, 0);
                                 break;
                         case 2:
                                 printf("Ugyfelazonosito: ");
-                                opt = intf_io_opt();
+                                s = intf_io_opt();
 
-                                resp = intf_cl_mod(db, opt);
-                                if (resp == EOOB)
-                                        puts("\nAz ugyfel nem talalhato.");
+                                retval = intf_cl_add_mod(db, true, s);
                                 break;
 
                         case 3:
                                 printf("Ugyfelazonosito: ");
-                                opt = intf_io_opt();
+                                s = intf_io_opt();
 
-                                resp = intf_client_rm(db, opt);
-                                if (resp == EOOB)
-                                        puts("\nAz ugyfel nem talalhato.");
+                                retval = db_cl_rm(db, s);
                                 break;
                         case 4:
                                 printf("Ugyfelzonosito: ");
-                                opt = intf_io_opt();
+                                s = intf_io_opt();
 
-                                resp = intf_car(db, opt);
-                                if (resp == EOOB)
-                                        puts("\nAz ugyfel nem talalhato.");
-                                else if (resp == EMALLOC)
-                                        return EMALLOC;
+                                retval = intf_car(db, s);
                                 break;
                         default:
                                 puts("\nErvenytelen opcio.");
                                 break;
                 }
+
+                if (retval == EMALLOC)
+                        return EMALLOC;
+
+                if (retval == EOOB)
+                        puts("\nAz ugyfel nem talalhato.");
         }
         return 0;
 }
 
 /**
- * @brief The frontend for client addition.
+ * @brief The frontend for client addition/modification.
  * @param db The destination database.
+ * @param mod Set to \c true if the user requests modification.
+ * @param cl The client's index if \c mod is \c true .
  * @return \c db_cl_add() with the user given parameters.
  */
-int intf_cl_add(const struct database *db)
+int intf_cl_add_mod(const struct database *db, bool mod, idx cl)
 {
+        if (mod && !db_cl_get(db, cl))
+                return EOOB;
+
         char name[NAME_SIZE + 1] = "\0";
         char email[EMAIL_SIZE + 1] = "\0";
         char phone[PHNUM_SIZE + 1] = "\0";
@@ -110,41 +111,8 @@ int intf_cl_add(const struct database *db)
         printf("Ugyfel telefonszama (max. %d karakter): ", PHNUM_SIZE);
         intf_io_fgets(phone, PHNUM_SIZE + 1);
 
+        if (mod)
+                return db_cl_mod(db, cl, name, email, phone);
+
         return db_cl_add(db, name, email, phone);
-}
-
-/**
- * @brief The frontend for client modification.
- * @param db The destination database.
- * @param cl The client's index.
- * @return \c db_cl_mod() with the user given parameters.
- */
-int intf_cl_mod(const struct database *db, idx cl)
-{
-        char name[NAME_SIZE + 1] = "\0";
-        char email[EMAIL_SIZE + 1] = "\0";
-        char phone[PHNUM_SIZE + 1] = "\0";
-
-        printf("Ugyfel uj neve (max. %d karakter): ", NAME_SIZE);
-        intf_io_fgets(name, NAME_SIZE + 1);
-
-        printf("Ugyfel uj email cime (max. %d karater): ", EMAIL_SIZE);
-        intf_io_fgets(email, EMAIL_SIZE + 1);
-
-        printf("Ugyfel uj telefonszama (max. %d karakter): ", PHNUM_SIZE);
-        intf_io_fgets(phone, PHNUM_SIZE + 1);
-
-
-        return db_cl_mod(db, cl, name, email, phone);
-}
-
-/**
- * @brief The frontend for client removal.
- * @param db The destination database.
- * @param cl The client's index.
- * @return \c db_cl_rm() with the user given parameters.
- */
-int intf_client_rm(const struct database *db, idx cl)
-{
-        return db_cl_rm(db, cl);
 }

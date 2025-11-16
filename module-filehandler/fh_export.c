@@ -12,29 +12,7 @@
 #include "include/fh.h"
 
 /**
- * @brief Exports a client to a file in the following format: U>name|email|phone
- * @param client Pointer to the client structure to be exported.
- * @param target Pointer to target file.
- */
-void fh_client_export(struct client *client, FILE *target)
-{
-        fprintf(target, "U>%s|%s|%s\n", client->name, client->email,
-                 client->phone);
-}
-
-/**
- * @brief Exports a car to a file in the following format: A>name|plate
- * @param car Pointer to the car structure to be exported.
- * @param target Pointer to target file.
- */
-void fh_car_export(struct car *car, FILE *target)
-{
-        fprintf(target, "A>%s|%s\n", car->name, car->plate);
-}
-
-/**
- * @brief Exports an operation to a file in the following format:\n
- *        U>description|price|date_cr|date_exp
+ * @brief Exports an operation to a file.
  * @param op Pointer to the operation structure to be exported.
  * @param target Pointer to target file.
  * @note  If \c date_exp is uninintialized (marked by \c date_exp.y being \c 0)
@@ -56,9 +34,13 @@ void fh_op_export(struct operation *op, FILE *target)
 
 /**
  * @brief Exports a database to file called \c export.txt .
+ * @details Exports objects in the following format:\n
+ *          Clients: \c U>name|email|phone \n
+ *          Cars: \c A>name|plate \n
+ *          Objects: \c J>desc|price|date_cr|date_exp \n
  * @param db Pointer to the database to be exported.
  * @retval 0 On success.
- * @retval EFPERM If the file cannot be opened for writing.
+ * @retval EFPERM If the file cannot be opened/created for writing.
  * @note If \c export.txt doesn't exsist, this function creates it.
  */
 int fh_export(struct database *db)
@@ -70,12 +52,12 @@ int fh_export(struct database *db)
         fprintf(target, "D>%s|%s\n", db->name, db->desc);
 
         for (idx i = 0; i < db->cl->size; i++) {
-                struct client *client = db_cl_get(db, i);
-                fh_client_export(client, target);
+                struct client *cl = db_cl_get(db, i);
+                fprintf(target, "U>%s|%s|%s\n", cl->name, cl->email, cl->phone);
 
-                for (idx j = 0; j < client->cars->size; j++) {
+                for (idx j = 0; j < cl->cars->size; j++) {
                         struct car *car = db_car_get(db, i, j);
-                        fh_car_export(car, target);
+                        fprintf(target, "A>%s|%s\n", car->name, car->plate);
 
                         for (idx k = 0; k < car->operations->size; k++) {
                                 struct operation *op = db_op_get(db, i, j, k);

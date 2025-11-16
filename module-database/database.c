@@ -6,7 +6,7 @@
  *          means we don't have to worry about memory leaks and other memory
  *          related errors/bugs. Just use \c db_del() to clean up and to avoid
  *          leaks.\n
-*           The functions defined here help initialize and manage objects on
+ *           The functions defined here help initialize and manage objects on
  *          the heap using the vectors defined in \c vector.h. The objects are:
  *          clients, cars and operations. They have the same hierarchy as
  *          mentioned.\n

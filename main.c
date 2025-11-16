@@ -14,13 +14,14 @@
 
 /**
  * @brief Cleans up the allocated memory and exits the program with an error
- *        code..
+ *        code.
  * @param db Pointer the main database.
  * @param err_code Error code sent to the operating system.
  * @note File closing is handled by the filehandler module.
  */
 void err_cleanup(struct database *db, int err_code)
 {
+        fprintf(stderr, "Takaritas es kilepes...\n");
         db_del(db);
         exit(err_code);
 }
@@ -37,16 +38,24 @@ int errh_call(int (*function)(struct database *), struct database *db)
 
         switch (error_code) {
                 case EMALLOC:
-                        fprintf(stderr, "\nMemoriakezelesi hiba. Kilepes...\n");
+                        fprintf(stderr, "\nMemoriakezelesi hiba.\n");
+
+                        /* If this is not a read error, try to save to a file.*/
+                        if (function != fh_import)
+                                fh_export(db);
+
                         err_cleanup(db, error_code);
                         break;
                 case EFPERM:
-                        fprintf(stderr, "\nA faljt nem lehet megnyitni irasra.\n");
+                        fprintf(stderr, "\nA faljt nem lehet megnyitni.\n");
                         err_cleanup(db, error_code);
                         break;
                 case EINV:
-                        /* Only fh_import() will return EINV. */
-                        fprintf(stderr, "\nA fajl formatuma nem megfelelo. Kilepes...\n");
+                        /*
+                         * Only fh_import() will return EINV. (as of now)
+                         * Other functions ignore EINV.
+                         */
+                        fprintf(stderr, "\nA fajl formatuma nem megfelelo.\n");
                         err_cleanup(db, error_code);
                         break;
                 default:
@@ -65,8 +74,8 @@ int main(void)
         setbuf(stdout, NULL);
         struct database *db = db_init("(nincs nev)", "(nincs leiras)\n");
         if (!db) {
-                fprintf(stderr, "\nNem lehet letrehozni az adatbazist. Kilepes...\n");
-                return 1;
+                fprintf(stderr, "\nNem lehet letrehozni az adatbazist.\n");
+                return EMALLOC;
         }
 
         errh_call(fh_import, db);

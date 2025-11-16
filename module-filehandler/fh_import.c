@@ -2,12 +2,12 @@
  * @file fh_import.c
  * @brief Function definitions to load a file into a database.
  * @details The import process is based on the same hierarchical logic as the
- *          database.\n The source file is parsed line-by-line. The program looks
- *          for an ID char first (U, A or J), this marks the datatype. When the
- *          datatype has been determined, the program will parse the string
- *          accordingly. As for the linkage, the program will link all clients
- *          to the destination database. As for the others they will link to
- *          their last stored parent object.
+ *          database.\n The source file is parsed line-by-line. The program
+ *          looks for an ID char first (U, A or J), this marks the datatype.
+ *          When the datatype has been determined, the program will parse the
+ *          string accordingly. As for the linkage, the program will link all
+ *          clients to the destination database. As for the others they will
+ *          link to their last stored parent object.
  * @warning The implementation does \b not check file or data integrity and
  *          \b cannot detect intentional tampering with the source file.
  */
@@ -26,7 +26,7 @@
  */
 int fh_buffer_filler(char *str, char **buf, size_t *buf_size, size_t buf_cnt)
 {
-
+        /* Ignore the ID char */
         strtok(str, ">");
 
         for (idx i = 0; i < buf_cnt; i++) {
@@ -64,12 +64,18 @@ int fh_buffer_filler(char *str, char **buf, size_t *buf_size, size_t buf_cnt)
  * @returns vct_push() - if the creation was sucessful.
  * @retval 0 On success.
  * @retval EMALLOC If the operation allocation fails.
+ * @retval EINV If the parent car doesn't exist.
  * @note Dates should be in 'YYYY-MM-DD HH:MM' format (or 0 if not used).
  * @note For all return values see \c vct_push.
  */
 int fh_db_op_add(struct database *db, idx cl, idx car, const char *desc,
                  double price, const char *date_cr, const char *date_exp)
 {
+        /* Get the parent object to link to */
+        struct car *tmp = db_car_get(db, cl, car);
+        if (!tmp)
+                return EINV;
+
         struct operation *op = malloc(sizeof(struct operation));
         if (!op)
                 return EMALLOC;
@@ -78,14 +84,11 @@ int fh_db_op_add(struct database *db, idx cl, idx car, const char *desc,
         op->price = price;
         op->date_cr = date_parse(date_cr);
 
-        /* check if date_exp is uninitialized (indicated by a 0 in the file) */
+        /* Check if date_exp is uninitialized (indicated by a 0 in the file) */
         if (date_exp[0] != '0')
                 op->date_exp = date_parse(date_exp);
         else
                 op->date_exp.y = 0;
-
-        /* get the parent object to link to */
-        struct car *tmp = db_car_get(db, cl, car);
 
         return vct_push(tmp->operations, op);
 }

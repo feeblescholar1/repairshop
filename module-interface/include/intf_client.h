@@ -15,8 +15,6 @@
 
 void intf_cl_txt(const struct database *db);
 int intf_cl(const struct database *db);
-int intf_cl_mod(const struct database *db, idx cl);
-int intf_cl_add(const struct database *db);
-int intf_client_rm(const struct database *db, idx cl);
+int intf_cl_add_mod(const struct database *db, bool mod, idx cl);
 
 #endif //REPAIRSHOP_INTF_CLIENT_H
