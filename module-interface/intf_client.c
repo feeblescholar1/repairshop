@@ -146,5 +146,5 @@ int intf_cl_mod(const struct database *db, idx cl)
  */
 int intf_client_rm(const struct database *db, idx cl)
 {
-        return obj_cl_rm(db->cl, cl);
+        return db_cl_rm(db, cl);
 }

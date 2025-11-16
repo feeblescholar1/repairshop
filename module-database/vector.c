@@ -156,7 +156,7 @@ int vct_pop(struct vector *v)
         }
 
         void **tmp = realloc(v->items, (v->size + 1) * sizeof(void*));
-        if (tmp == NULL)
+        if (!tmp)
                 return EREALLOC;
 
         v->items = tmp;
@@ -174,7 +174,7 @@ int vct_pop(struct vector *v)
  */
 int vct_rm(struct vector *v, idx pos)
 {
-        if (v == NULL)
+        if (!v)
                 return EINV;
 
         if (!inbounds(v, pos))
@@ -195,7 +195,7 @@ int vct_rm(struct vector *v, idx pos)
         }
 
         void **tmp = realloc(v->items, (v->size + 1) * sizeof(void*));
-        if (tmp == NULL)
+        if (!tmp)
                 return EREALLOC;
 
         v->items = tmp;
@@ -210,7 +210,7 @@ int vct_rm(struct vector *v, idx pos)
  */
 int vct_del(struct vector *v)
 {
-        if (v == NULL)
+        if (!v)
                 return EINV;
 
         if (v->size == 0){

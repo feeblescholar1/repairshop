@@ -10,8 +10,8 @@
 /**
  * @brief Gets the current date and time and creates a date structure.
  * @return A newly created date structure.
- * @note Unlike the objects in \c objects.h or the database in \c database.h
- *       this object is \b not allocated on the heap.
+ * @note Unlike the objects in the database in \c database.h this object is
+ *       \b not allocated on the heap.
  */
 struct date date_now(void)
 {
@@ -36,8 +36,8 @@ struct date date_now(void)
  * @param str A date to be parsed in a YYYY-MM-DD HH:MM format.
  * @warning It's the caller's responsibility to ensure the correct format.
  * @return A newly created date structure basen on str.
- * @note Unlike the objects in \c objects.h or the database in \c database.h
- *       this object is \b not allocated on the heap.
+ * @note Unlike the objects in the database in \c database.h this object is
+ *       \b not allocated on the heap.
  */
 struct date date_parse(const char *str)
 {
