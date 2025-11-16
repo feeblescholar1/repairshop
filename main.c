@@ -13,54 +13,66 @@
 #include "module-filehandler/include/fh.h"
 
 /**
- * @brief Prints out an error message to \c stderr .
- * @param err_code An errorcode defined in \c errorcodes.h
- * @return The \c err_code parameter.
+ * @brief Cleans up the allocated memory and exits the program with an error
+ *        code..
+ * @param db Pointer the main database.
+ * @param err_code Error code sent to the operating system.
+ * @note File closing is handled by the filehandler module.
  */
-int err_msg(int err_code)
+void err_cleanup(struct database *db, int err_code)
 {
-        switch (err_code) {
+        db_del(db);
+        exit(err_code);
+}
+
+/**
+ * @brief Error handled function caller. Used only in \c main().
+ * @param function Pointer to the function to be called.
+ * @param db Pointer to the database that will be passed to function.
+ * @return \c 0 if there were no errors, non-zero if there was an error.
+ */
+int errh_call(int (*function)(struct database *), struct database *db)
+{
+        int error_code = function(db);
+
+        switch (error_code) {
                 case EMALLOC:
-                        fprintf(stderr, "Memoriakezelesi hiba. Kilepes...\n");
+                        fprintf(stderr, "\nMemoriakezelesi hiba. Kilepes...\n");
+                        err_cleanup(db, error_code);
                         break;
                 case EFPERM:
-                        fprintf(stderr, "A faljt nem lehet megnyitni irasra.");
+                        fprintf(stderr, "\nA faljt nem lehet megnyitni irasra.\n");
+                        err_cleanup(db, error_code);
+                        break;
+                case EINV:
+                        /* Only fh_import() will return EINV. */
+                        fprintf(stderr, "\nA fajl formatuma nem megfelelo. Kilepes...\n");
+                        err_cleanup(db, error_code);
                         break;
                 default:
                         break;
         }
 
-        return err_code;
+        return error_code;
 }
 
 /**
  * @brief The (fake) program entry. We all know that the program starts at
  *        the label \c _start . Documented for completeness’ sake.
- * @return Returns 0 on success or whatever error code the modules throw.
  */
 int main(void)
 {
         setbuf(stdout, NULL);
         struct database *db = db_init("(nincs nev)", "(nincs leiras)\n");
+        if (!db) {
+                fprintf(stderr, "\nNem lehet letrehozni az adatbazist. Kilepes...\n");
+                return 1;
+        }
 
-        int err_code = 0;
-
-        err_code = fh_import(db);
-        if (err_code == EMALLOC)
-                goto cleanup;
-
-        err_code = intf_main(db);
-        if (err_code)
-                goto cleanup;
-
-        err_code = fh_export(db);
-        if (err_code)
-                goto cleanup;
+        errh_call(fh_import, db);
+        errh_call(intf_main, db);
+        errh_call(fh_export, db);
 
         db_del(db);
         return 0;
-
-        cleanup:
-                db_del(db);
-                return err_msg(err_code);
 }

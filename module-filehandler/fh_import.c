@@ -12,7 +12,39 @@
  *          \b cannot detect intentional tampering with the source file.
  */
 
+#include <math.h>
+
 #include "include/fh.h"
+
+/**
+ * @brief Fills an array of buffers and checks if it's valid.
+ * @param str Pointer to the string to be tokenized.
+ * @param buf Pointer to an array of buffers.
+ * @param buf_size Pointer to an array that contains the buffer sizes.
+ * @param buf_cnt Number of buffers to be filled.
+ * @return \c 0 if it's successful, \c EINV if not.
+ */
+int fh_buffer_filler(char *str, char **buf, size_t *buf_size, size_t buf_cnt)
+{
+
+        strtok(str, ">");
+
+        for (idx i = 0; i < buf_cnt; i++) {
+                char *next_token = strtok(NULL, "|\n");
+
+                /* Check if the even token exists. */
+                if (!next_token)
+                        return EINV;
+
+                /* Check if the token is too long. */
+                if (strlen(next_token) > buf_size[i])
+                        return EINV;
+
+                strcpy(buf[i], next_token);
+        }
+
+        return 0;
+}
 
 /**
  * @brief Adds an operation to a database.
@@ -71,13 +103,10 @@ int fh_parse_client(struct database *dst, char *str)
         char email[EMAIL_SIZE + 1] = "\0";
         char phone[PHNUM_SIZE + 1] = "\0";
 
-        char *buf_ptr[3]= {name, email, phone};
+        char *buf_ptr[3] = {name, email, phone};
+        size_t expected_size[3] = {NAME_SIZE, EMAIL_SIZE, PHNUM_SIZE};
 
-        /* the first token is not needed */
-        strtok(str, ">");
-        /* fill the buffers */
-        for (int i = 0; i < 3; i++)
-                strcpy(buf_ptr[i], strtok(NULL, "|\n"));
+        fh_buffer_filler(str, buf_ptr, expected_size, 3);
 
         return db_cl_add(dst, name, email, phone);
 }
@@ -95,10 +124,11 @@ int fh_parse_car(struct database *dst, idx cl, char *str)
         char name[NAME_SIZE + 1] = "\0";
         char plate[PLATE_SIZE + 1] = "\0";
 
-        /* the first token is not needed */
-        strtok(str, ">");
-        strcpy(name, strtok(NULL, "|"));
-        strcpy(plate, strtok(NULL, "\n"));
+        char *buf_ptr[2] = {name, plate};
+        size_t expected_size[2] = {NAME_SIZE, PLATE_SIZE};
+
+        if (fh_buffer_filler(str, buf_ptr, expected_size, 2))
+                return EINV;
 
         return db_car_add(dst, cl, name, plate);
 }
@@ -115,19 +145,35 @@ int fh_parse_car(struct database *dst, idx cl, char *str)
 int fh_parse_op(struct database *dst, idx cl, idx car, char *str)
 {
         char desc[DESC_SIZE + 1] = "\0";
-        double price = 0;
-        char date_cr[DEFAULT_BUF_SIZE + 1];
-        char date_exp[DEFAULT_BUF_SIZE + 1];
+        char price[DEFAULT_BUF_SIZE + 1] = "\0";
+        char date_cr[DEFAULT_BUF_SIZE + 1] = "\0";
+        char date_exp[DEFAULT_BUF_SIZE + 1] = "\0";
 
-        /* the first token is not needed */
-        strtok(str, ">");
+        char *buf_ptr[4] = {desc, price, date_cr, date_exp};
+        size_t expected_size[4] = {DESC_SIZE, DEFAULT_BUF_SIZE,
+                                        DEFAULT_BUF_SIZE, DEFAULT_BUF_SIZE};
 
-        strcpy(desc, strtok(NULL, "|"));
-        sscanf(strtok(NULL, "|"), "%lf", &price);
-        strcpy(date_cr, strtok(NULL, "|"));
-        strcpy(date_exp, strtok(NULL, "\n"));
+        if (fh_buffer_filler(str, buf_ptr, expected_size, 4))
+                return EINV;
 
-        return fh_db_op_add(dst, cl, car, desc, price, date_cr, date_exp);
+        double price_ = 0;
+        if (sscanf(price, "%lf", &price_) != 1)
+                return EINV;
+
+        return fh_db_op_add(dst, cl, car, desc, price_, date_cr, date_exp);
+}
+
+int fh_parse_dbinfo(struct database *db, char *str)
+{
+        char *dst_ptr[2] = {db->name, db->desc};
+        size_t expected_size[2] = {NAME_SIZE, DESC_SIZE};
+
+        if (fh_buffer_filler(str, dst_ptr, expected_size, 2))
+                return EINV;
+
+        db->desc[strcspn(db->desc, "\r\n")] = '\0';
+
+        return 0;
 }
 
 /**
@@ -155,31 +201,32 @@ int fh_import(struct database *dst)
                 /* check the char ID */
                 switch (read_buffer[0]) {
                         case 'D':
-                                strtok(read_buffer, ">");
-                                strcpy(dst->name, strtok(NULL, "|"));
-                                strcpy(dst->desc, strtok(NULL, "|"));
-                                dst->desc[strcspn(dst->desc, "\r\n")] = '\0';
+                                r = fh_parse_dbinfo(dst, read_buffer);
                                 break;
                         case 'U':
                                 r = fh_parse_client(dst, read_buffer);
-                                if (r == EMALLOC)
-                                        return EMALLOC;
                                 last_client_index++;
                                 last_car_index = -1;
                                 break;
                         case 'A':
                                 r = fh_parse_car(dst, last_client_index,
                                         read_buffer);
-                                if (r == EMALLOC)
-                                        return EMALLOC;
                                 last_car_index++;
                                 break;
                         case 'J':
                                 r = fh_parse_op(dst, last_client_index,
                                         last_car_index, read_buffer);
-                                if (r == EMALLOC)
-                                        return EMALLOC;
                                 break;
+                }
+
+                if (r == EMALLOC) {
+                        fclose(src);
+                        return EMALLOC;
+                }
+
+                if (r == EINV) {
+                        fclose(src);
+                        return EINV;
                 }
         }
 

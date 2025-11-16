@@ -323,5 +323,8 @@ int db_del(struct database *db)
 
         vct_del(db->cl);
         free(db);
+
+        /* To avoid calling this function twice, set db to NULL.*/
+        db = NULL;
         return 0;
 }

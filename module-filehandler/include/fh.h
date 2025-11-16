@@ -17,6 +17,6 @@
 #define LONGEST_VALID_LINE (NAME_SIZE + EMAIL_SIZE + PHNUM_SIZE + FORMAT_RQ)
 
 int fh_import(struct database *dst);
-int fh_export(const struct database *db);
+int fh_export(struct database *db);
 
 #endif //REPAIRSHOP_FH_EXPORT_H

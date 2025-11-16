@@ -61,7 +61,7 @@ void fh_op_export(struct operation *op, FILE *target)
  * @retval EFPERM If the file cannot be opened for writing.
  * @note If \c export.txt doesn't exsist, this function creates it.
  */
-int fh_export(const struct database *db)
+int fh_export(struct database *db)
 {
         FILE *target = fopen("export.txt", "w");
         if (!target)

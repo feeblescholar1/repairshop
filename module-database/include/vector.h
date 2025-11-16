@@ -16,7 +16,7 @@
 #include <stdbool.h>
 
 #include "../../include/errorcodes.h"
-//#include "../../include/external/debugmalloc.h"
+#include "../../include/external/debugmalloc.h"
 
 #define idx size_t /**< Macro for size_t */
 
