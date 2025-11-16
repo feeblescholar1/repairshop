@@ -12,10 +12,10 @@
 #include "intf_car.h"
 #include "intf_client.h"
 
-int intf_search(struct database *db);
+int intf_search(database *db);
 
-struct sres intf_search_cl(struct database *db);
-struct sres intf_search_plate(struct database *db);
-struct sres intf_search_exp(struct database *db);
+sres intf_search_cl(database *db);
+sres intf_search_plate(database *db);
+sres intf_search_exp(database *db);
 
 #endif //REPAIRSHOP_INTF_SEARCH_H

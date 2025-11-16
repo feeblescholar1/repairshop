@@ -7,7 +7,7 @@
 /**
  * @brief Prints the client management menu's text to \c stdout .
  */
-void intf_cl_txt(const struct database *db)
+void intf_cl_txt(const database *db)
 {
         puts("------------------ Ugyfelek kezelese -----------------");
         puts("[0] Vissza");
@@ -22,7 +22,7 @@ void intf_cl_txt(const struct database *db)
         }
         else {
                 for (idx i = 0; i < db->cl->size; i++) {
-                        struct client *cl = db_cl_get(db, i);
+                        client *cl = db_cl_get(db, i);
                         printf("[%zu][%s][%s][%s][auto(k): %zu]\n", i,
                                 cl->name, cl->email, cl->phone, cl->cars->size);
                 }
@@ -38,7 +38,7 @@ void intf_cl_txt(const struct database *db)
  * @retval 0 If the user requests to go back.
  * @retval EMALLOC If a memory allocation failure is occured.
  */
-int intf_cl(const struct database *db)
+int intf_cl(const database *db)
 {
         bool submenu_active = true;
         while (submenu_active) {
@@ -93,7 +93,7 @@ int intf_cl(const struct database *db)
  * @param cl The client's index if \c mod is \c true .
  * @return \c db_cl_add() with the user given parameters.
  */
-int intf_cl_add_mod(const struct database *db, bool mod, idx cl)
+int intf_cl_add_mod(const database *db, bool mod, idx cl)
 {
         if (mod && !db_cl_get(db, cl))
                 return EOOB;

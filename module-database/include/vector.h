@@ -24,22 +24,22 @@
  * @struct vector vector.h
  * @brief A vector for storing pointers.
  */
-struct vector {
+typedef struct vector {
         void **items; /**< Generic dynamically allocated pointer array. */
         size_t size; /**< The size of the vector */
-};
+} vector;
 
-struct vector *vct(void);
+vector *vct(void);
 
-bool inbounds(const struct vector *v, idx pos);
+bool inbounds(const vector *v, idx pos);
 
-int vct_push(struct vector *v, void *data);
-int vct_insert(struct vector *v, void *data, idx pos);
+int vct_push(vector *v, void *data);
+int vct_insert(vector *v, void *data, idx pos);
 
-void *vct_subptr(const struct vector *v, idx pos);
+void *vct_subptr(const vector *v, idx pos);
 
-int vct_pop(struct vector *v);
-int vct_rm(struct vector *v, idx pos);
+int vct_pop(vector *v);
+int vct_rm(vector *v, idx pos);
 
-int vct_del(struct vector *v);
+int vct_del(vector *v);
 #endif //REPAIRSHOP_VECTOR_H

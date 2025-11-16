@@ -8,9 +8,9 @@
 /**
  * @brief Prints the car/operation management menu's text to \c stdout .
  */
-void intf_car_txt(const struct database *db, idx cl)
+void intf_car_txt(const database *db, idx cl)
 {
-        struct client *cl_ = db_cl_get(db, cl);
+        client *cl_ = db_cl_get(db, cl);
 
         puts("\n------------------ Autok kezelese -------------------");
         puts("[0] Vissza");
@@ -23,21 +23,22 @@ void intf_car_txt(const struct database *db, idx cl)
         puts("------------------------------------------------------");
         printf("[%s][%s][%s]\n", cl_->name, cl_->email, cl_->phone);
         puts("------------------------------------------------------");
+
         if (cl_->cars->size == 0) {
                 puts("Ennek az ugyfelnek nincsenek hozzadott autoi.");
                 goto txt_end;
         }
+
         for (idx i = 0; i < cl_->cars->size; i++) {
-                struct car *car = db_car_get(db, cl, i);
+                car *car = db_car_get(db, cl, i);
                 printf("[%zu][%s][%s]\n", i, car->name, car->plate);
 
                 for (idx j = 0; j < car->operations->size; j++) {
-                        struct operation *op = db_op_get(db, cl, i, j);
+                        operation *op = db_op_get(db, cl, i, j);
                         char date_str[17];
                         date_printf(&op->date_cr, date_str);
 
-                        printf("\t\t[%zu][%s][%.2f][%s]", j, op->desc,
-                                op->price, date_str);
+                        printf("\t\t[%zu][%s][%.2f][%s]", j, op->desc, op->price, date_str);
 
                         if (op->date_exp.y != 0) {
                                 char date_str2[17];
@@ -63,7 +64,7 @@ void intf_car_txt(const struct database *db, idx cl)
  * @retval EOOB If the user requested a client, who doesn't exist in the database.
  * @retval EMALLOC If a memory allocation failure is occured.
  */
-int intf_car(const struct database *db, idx cl)
+int intf_car(const database *db, idx cl)
 {
         if (!db_cl_get(db, cl))
                 return EOOB;
@@ -141,7 +142,7 @@ int intf_car(const struct database *db, idx cl)
  * @param car The car's index if \c mod is \c true .
  * @return \c db_car_add() with the user given parameters.
  */
-int intf_car_add_mod(const struct database *db, idx cl, bool mod, idx car)
+int intf_car_add_mod(const database *db, idx cl, bool mod, idx car)
 {
         if (mod && !db_car_get(db, cl, car))
                 return EOOB;
@@ -170,8 +171,7 @@ int intf_car_add_mod(const struct database *db, idx cl, bool mod, idx car)
  * @param op The operation's index if \c mod is \c true .
  * @return \c db_op_add() with the user given parameters.
  */
-int intf_op_add_mod(const struct database *db, idx cl, idx car, bool mod,
-                        idx op)
+int intf_op_add_mod(const database *db, idx cl, idx car, bool mod, idx op)
 {
         if (!db_car_get(db, cl, car) || (mod && !db_op_get(db, cl, car, op)))
                 return EOOB;
@@ -181,8 +181,7 @@ int intf_op_add_mod(const struct database *db, idx cl, idx car, bool mod,
         char date_buffer[DEFAULT_BUF_SIZE + 1] = "\0";
         double price = 0;
 
-        printf("Javitas/vizsga leirasa (max. %d karakter, formatum: nincs): ",
-                DESC_SIZE);
+        printf("Javitas/vizsga leirasa (max. %d karakter, formatum: nincs): ", DESC_SIZE);
         intf_io_fgets(desc_buffer, DESC_SIZE + 1);
 
         printf("Javitas/vizsga (forintban, formatum: csak szam): ");
@@ -194,11 +193,9 @@ int intf_op_add_mod(const struct database *db, idx cl, idx car, bool mod,
 
         if (mod) {
                 if (date_buffer[0] == '\n')
-                        return db_op_mod(db, cl, car, op, desc_buffer, price,
-                                         NULL);
+                        return db_op_mod(db, cl, car, op, desc_buffer, price, NULL);
 
-                return db_op_mod(db, cl, car, op, desc_buffer, price,
-                                 date_buffer);
+                return db_op_mod(db, cl, car, op, desc_buffer, price, date_buffer);
         }
 
         if (date_buffer[0] == '\n')

@@ -9,7 +9,7 @@
 #include "intf_client.h"
 #include "intf_search.h"
 
-void intf_main_txt(struct database *db);
-int intf_main(struct database *db);
+void intf_main_txt(database *db);
+int intf_main(database *db);
 
 #endif //REPAIRSHOP_INTF_H

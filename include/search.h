@@ -13,13 +13,13 @@
  * @struct sres search.h
  * @brief A structure for containing search results.
  */
-struct sres {
-        struct vector *map;      /**< Stores the database indexes */
+typedef struct sres {
+        vector *map;      /**< Stores the database indexes */
         int err;                /**<  Error code */
-};
+} sres;
 
-struct sres search_cl(struct database *db, const char *term);
-struct sres search_plate(struct database *db, const char *term);
-struct sres search_expiration(struct database *db);
+sres search_cl(database *db, const char *term);
+sres search_plate(database *db, const char *term);
+sres search_expiration(database *db);
 
 #endif //REPAIRSHOP_SEARCH_H

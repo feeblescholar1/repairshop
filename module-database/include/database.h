@@ -23,69 +23,63 @@
  * @struct database database.h
  * @brief Primary data type used in cross-module data management.
  */
-struct database {
+typedef struct database {
         char name[NAME_SIZE + 1];       /**< The database's name */
         char desc[DESC_SIZE + 1];       /**< The database's description. */
-        struct vector *cl;              /**< The database's client vector. */
-};
+        vector *cl;              /**< The database's client vector. */
+} database;
 
 /**
  * @struct client database.h
  * @brief A client structure with user data and a car vector.
  */
-struct client {
+typedef struct client {
         char name[NAME_SIZE + 1];       /**< The client's name */
         char email[EMAIL_SIZE + 1];     /**< The client's email address. */
         char phone[PHNUM_SIZE + 1];     /**< The client's phone number. */
-        struct vector *cars;            /**< This client's car vector. */
-};
+        vector *cars;            /**< This client's car vector. */
+} client;
 
 /**
  * @struct car database.h
  * @brief A car structure with user data and an operation vector.
  * @note Must be linked to an existing client.
  */
-struct car {
+typedef struct car {
         char name[NAME_SIZE + 1];       /**< The car's name/model. */
         char plate[PLATE_SIZE + 1];     /**< The car's plate number. */
-        struct vector *operations;      /**< This car's operation vector. */
-};
+        vector *operations;      /**< This car's operation vector. */
+} car;
 
 /**
  * @struct operation database.h
  * @brief An operation structure with user data and an operation vector.
  * @note Must be linked to an existing car.
  */
-struct operation {
+typedef struct operation {
         char desc[DESC_SIZE + 1];       /**< The operation's description. */
         double price;                   /**< The operation's price. */
-        struct date date_cr;            /**< The date of creation. */
-        struct date date_exp;           /**< The date of expiration (if applicable) */
-};
+        date date_cr;            /**< The date of creation. */
+        date date_exp;           /**< The date of expiration (if applicable) */
+} operation;
 
-struct database *db_init(const char *name, const char *desc);
+database *db_init(const char *name, const char *desc);
 
-int db_cl_add(const struct database *db, const char *name,
-        const char *email, const char *phone);
-int db_car_add(const struct database *db, idx cl,
-        const char *name, const char *plate);
-int db_op_add(const struct database *db, idx cl, idx car,
-        const char *desc, double price, const char *date);
+int db_cl_add(const database *db, const char *name, const char *email, const char *phone);
+int db_car_add(const database *db, idx cl, const char *name, const char *plate);
+int db_op_add(const database *db, idx cl, idx cr, const char *desc, double price, const char *date);
 
-struct client *db_cl_get(const struct database *db, idx cl);
-struct car *db_car_get(const struct database *db, idx cl, idx car);
-struct operation *db_op_get(const struct database *db, idx cl, idx car, idx op);
+client *db_cl_get(const database *db, idx cl);
+car *db_car_get(const database *db, idx cl, idx car);
+operation *db_op_get(const database *db, idx cl, idx cr, idx op);
 
-int db_cl_mod(const struct database *db, idx cl, const char *name,
-        const char *email, const char *phone);
-int db_car_mod(const struct database *db, idx cl, idx car, const char *name,
-        const char *plate);
-int db_op_mod(const struct database *db, idx cl, idx car, idx op,
-        const char *desc, double price, const char *date);
+int db_cl_mod(const database *db, idx cl, const char *name, const char *email, const char *phone);
+int db_car_mod(const database *db, idx cl, idx cr, const char *name, const char *plate);
+int db_op_mod(const database *db, idx cl, idx car, idx op, const char *desc, double price, const char *date);
 
-int db_cl_rm(const struct database *db, idx cl);
-int db_car_rm(const struct database *db, idx cl, idx car);
-int db_op_rm(const struct database *db, idx cl, idx car, idx op);
+int db_cl_rm(const database *db, idx cl);
+int db_car_rm(const database *db, idx cl, idx cr);
+int db_op_rm(const database *db, idx cl, idx cr, idx op);
 
-int db_del(struct database *db);
+int db_del(database *db);
 #endif //REPAIRSHOP_DATABASE_H

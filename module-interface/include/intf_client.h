@@ -13,8 +13,8 @@
 #include "intf_io.h"
 #include "intf_car.h"
 
-void intf_cl_txt(const struct database *db);
-int intf_cl(const struct database *db);
-int intf_cl_add_mod(const struct database *db, bool mod, idx cl);
+void intf_cl_txt(const database *db);
+int intf_cl(const database *db);
+int intf_cl_add_mod(const database *db, bool mod, idx cl);
 
 #endif //REPAIRSHOP_INTF_CLIENT_H

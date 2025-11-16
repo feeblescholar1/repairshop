@@ -1,15 +1,12 @@
 /**
  * @file fh_import.c
  * @brief Function definitions to load a file into a database.
- * @details The import process is based on the same hierarchical logic as the
- *          database.\n The source file is parsed line-by-line. The program
- *          looks for an ID char first (U, A or J), this marks the datatype.
- *          When the datatype has been determined, the program will parse the
- *          string accordingly. As for the linkage, the program will link all
- *          clients to the destination database. As for the others they will
- *          link to their last stored parent object.
- * @warning The implementation does \b not check file or data integrity and
- *          \b cannot detect intentional tampering with the source file.
+ * @details The import process is based on the same hierarchical logic as the database.\n The source file is parsed
+ *          line-by-line. The program looks for an ID char first (U, A or J), this marks the datatype. When the datatype
+ *          has been determined, the program will parse the string accordingly. As for the linkage, the program will
+ *          link all clients to the destination database. The others will link to the last stored parent object.
+ * @warning The implementation does \b not check file or data integrity and \b cannot detect intentional tampering with
+ *          the source file.
  */
 
 #include <math.h>
@@ -48,15 +45,12 @@ int fh_buffer_filler(char *str, char **buf, size_t *buf_size, size_t buf_cnt)
 
 /**
  * @brief Adds an operation to a database.
- * @details For the filehandler, a special operation import functions is needed,
- *          since \c db_op_add() can only parse \c date_exp and generates
- *          \c date_cr during runtime, which would produce inaccurate results,
- *          since date of creation is \b not the current date and time. Most
- *          likely, those operations were created much earlier. This fuction can
- *          parse \c date_cr too to avoid that.
+ * @details For the filehandler, a special operation import functions is needed, since \c db_op_add() can only parse
+ *          \c date_exp and generates \c date_cr during runtime, which would produce inaccurate results, since date of
+ *          creation is \b not the current date and time. This fuction can parse \c date_cr too to avoid that.
  * @param db The pointer to destination database.
  * @param cl The client's index in the database.
- * @param car The car's index in the database.
+ * @param cr The car's index in the database.
  * @param desc The operation's description.
  * @param price The operation's price.
  * @param date_cr A date string which will be parsed to \c date_cr .
@@ -68,15 +62,15 @@ int fh_buffer_filler(char *str, char **buf, size_t *buf_size, size_t buf_cnt)
  * @note Dates should be in 'YYYY-MM-DD HH:MM' format (or 0 if not used).
  * @note For all return values see \c vct_push.
  */
-int fh_db_op_add(struct database *db, idx cl, idx car, const char *desc,
-                 double price, const char *date_cr, const char *date_exp)
+int fh_db_op_add(database *db, idx cl, idx cr, const char *desc, double price, const char *date_cr,
+                 const char *date_exp)
 {
         /* Get the parent object to link to */
-        struct car *tmp = db_car_get(db, cl, car);
-        if (!tmp)
+        car *parent = db_car_get(db, cl, cr);
+        if (!parent)
                 return EINV;
 
-        struct operation *op = malloc(sizeof(struct operation));
+        operation *op = malloc(sizeof(operation));
         if (!op)
                 return EMALLOC;
 
@@ -90,7 +84,7 @@ int fh_db_op_add(struct database *db, idx cl, idx car, const char *desc,
         else
                 op->date_exp.y = 0;
 
-        return vct_push(tmp->operations, op);
+        return vct_push(parent->operations, op);
 }
 
 /**
@@ -98,9 +92,9 @@ int fh_db_op_add(struct database *db, idx cl, idx car, const char *desc,
  * @param dst The pointer to the destination database.
  * @param str The string to be parsed.
  * @return db_cl_add() - with the tokenized parameters
- * @note The format of str should be: U>name|email|phone
+ * @note The format of str should be: \c U>name|email|phone
  */
-int fh_parse_client(struct database *dst, char *str)
+int fh_parse_client(database *dst, char *str)
 {
         char name[NAME_SIZE + 1] = "\0";
         char email[EMAIL_SIZE + 1] = "\0";
@@ -120,9 +114,9 @@ int fh_parse_client(struct database *dst, char *str)
  * @param cl The client's index in the database.
  * @param str The string to be parsed.
  * @return db_car_add() - with the tokenized parameters
- * @note The format of str should be: A>name|plate
+ * @note The format of str should be: \c A>name|plate
  */
-int fh_parse_car(struct database *dst, idx cl, char *str)
+int fh_parse_car(database *dst, idx cl, char *str)
 {
         char name[NAME_SIZE + 1] = "\0";
         char plate[PLATE_SIZE + 1] = "\0";
@@ -143,9 +137,9 @@ int fh_parse_car(struct database *dst, idx cl, char *str)
  * @param car The car's index in the database.
  * @param str The string to be parsed.
  * @return db_car_add() - with the tokenized parameters
- * @note The format of str should be: J>desc|plate|date_cr|date_exp
+ * @note The format of str should be: \c J>desc|plate|date_cr|date_exp
  */
-int fh_parse_op(struct database *dst, idx cl, idx car, char *str)
+int fh_parse_op(database *dst, idx cl, idx car, char *str)
 {
         char desc[DESC_SIZE + 1] = "\0";
         char price[DEFAULT_BUF_SIZE + 1] = "\0";
@@ -153,8 +147,7 @@ int fh_parse_op(struct database *dst, idx cl, idx car, char *str)
         char date_exp[DEFAULT_BUF_SIZE + 1] = "\0";
 
         char *buf_ptr[4] = {desc, price, date_cr, date_exp};
-        size_t expected_size[4] = {DESC_SIZE, DEFAULT_BUF_SIZE,
-                                        DEFAULT_BUF_SIZE, DEFAULT_BUF_SIZE};
+        size_t expected_size[4] = {DESC_SIZE, DEFAULT_BUF_SIZE, DEFAULT_BUF_SIZE, DEFAULT_BUF_SIZE};
 
         if (fh_buffer_filler(str, buf_ptr, expected_size, 4))
                 return EINV;
@@ -166,15 +159,13 @@ int fh_parse_op(struct database *dst, idx cl, idx car, char *str)
         return fh_db_op_add(dst, cl, car, desc, price_, date_cr, date_exp);
 }
 
-int fh_parse_dbinfo(struct database *db, char *str)
+int fh_parse_dbinfo(database *db, char *str)
 {
         char *dst_ptr[2] = {db->name, db->desc};
         size_t expected_size[2] = {NAME_SIZE, DESC_SIZE};
 
         if (fh_buffer_filler(str, dst_ptr, expected_size, 2))
                 return EINV;
-
-        db->desc[strcspn(db->desc, "\r\n")] = '\0';
 
         return 0;
 }
@@ -187,7 +178,7 @@ int fh_parse_dbinfo(struct database *db, char *str)
  * @retval EMALLOC If the database expansion fails.
  * @warning The destination database must be initilazed with \c db_init() first.
  */
-int fh_import(struct database *dst)
+int fh_import(database *dst)
 {
         FILE *src = fopen("export.txt", "r");
         if (!src)
@@ -198,36 +189,35 @@ int fh_import(struct database *dst)
         int last_car_index = -1;
 
         while (fgets(read_buffer, LONGEST_VALID_LINE, src) != NULL) {
-                /* function return value */
-                int r = 0;
+                int retval = 0;
 
                 /* check the char ID */
                 switch (read_buffer[0]) {
                         case 'D':
-                                r = fh_parse_dbinfo(dst, read_buffer);
+                                retval = fh_parse_dbinfo(dst, read_buffer);
                                 break;
                         case 'U':
-                                r = fh_parse_client(dst, read_buffer);
+                                retval = fh_parse_client(dst, read_buffer);
                                 last_client_index++;
                                 last_car_index = -1;
                                 break;
                         case 'A':
-                                r = fh_parse_car(dst, last_client_index,
-                                        read_buffer);
+                                retval = fh_parse_car(dst, last_client_index, read_buffer);
                                 last_car_index++;
                                 break;
                         case 'J':
-                                r = fh_parse_op(dst, last_client_index,
-                                        last_car_index, read_buffer);
+                                retval = fh_parse_op(dst, last_client_index, last_car_index, read_buffer);
+                                break;
+                        default:
                                 break;
                 }
 
-                if (r == EMALLOC) {
+                if (retval == EMALLOC) {
                         fclose(src);
                         return EMALLOC;
                 }
 
-                if (r == EINV) {
+                if (retval == EINV) {
                         fclose(src);
                         return EINV;
                 }

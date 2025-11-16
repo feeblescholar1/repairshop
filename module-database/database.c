@@ -1,21 +1,15 @@
 /**
  * @file database.c
  * @brief Functions for the project database which manages objects.
- * @details The main purpose of the database is to abstract object management
- *          away from the programmer. It also handles memory management, which
- *          means we don't have to worry about memory leaks and other memory
- *          related errors/bugs. Just use \c db_del() to clean up and to avoid
- *          leaks.\n
- *           The functions defined here help initialize and manage objects on
- *          the heap using the vectors defined in \c vector.h. The objects are:
- *          clients, cars and operations. They have the same hierarchy as
- *          mentioned.\n
- *          Operaitions are linked to cars and cars are linked to clients.
- *          Clients can be linked to any vector. This type of arrangement will
- *          allow the program to link multiple objects to the same, higher
- *          precedence one without any duplicate data.
- * @note Not all function return values are documented. Visit \c vector.c and
- *       \c date.c for all possible return values.
+ * @details The main purpose of the database is to abstract object management away from the programmer. It also handles
+ *          memory management, which means we don't have to worry about memory leaks and other memory related errors or
+ *          bugs. Just use \c db_del() to clean up and to avoid leaks.\n
+ *          The functions defined here help initialize and manage objects on the heap using the vectors defined in
+ *          \c vector.h. The objects are: clients, cars and operations. They have the same hierarchy as mentioned.\n
+ *          Operaitions are linked to cars and cars are linked to clients. Clients can be linked to any vector. This
+ *          type of arrangement will allow the program to link multiple objects to the same, higher precedence one
+ *          without any duplicate data.
+ * @note Not all function return values are documented. Visit \c vector.c and \c date.c for all possible return values.
  */
 
 #include "include/database.h"
@@ -28,12 +22,12 @@
  * @retval NULL If \c name or \c desc is too large.
  * @retval EMEMNULL If the database cannot be allocated.
  */
-struct database *db_init(const char *name, const char *desc)
+database *db_init(const char *name, const char *desc)
 {
         if (strlen(name) > NAME_SIZE + 1 || strlen(desc) > DESC_SIZE + 1)
                 return NULL;
 
-        struct database *db = malloc(sizeof(struct database));
+        database *db = malloc(sizeof(database));
         if (!db)
                 return EMEMNULL;
 
@@ -53,24 +47,21 @@ struct database *db_init(const char *name, const char *desc)
  * @retval EINV If \c db is \c NULL or at least 1 string is too large.
  * @retval EMALLOC If the new client cannot be allocated.
  */
-int db_cl_add(const struct database *db, const char *name, const char *email,
-              const char *phone)
+int db_cl_add(const database *db, const char *name, const char *email, const char *phone)
 {
-        if (!db || strlen(name) > NAME_SIZE + 1
-                || strlen(email) > EMAIL_SIZE + 1
-                || strlen(phone) > PHNUM_SIZE + 1)
+        if (!db || strlen(name) > NAME_SIZE + 1 || strlen(email) > EMAIL_SIZE + 1 || strlen(phone) > PHNUM_SIZE + 1)
                 return EINV;
 
-        struct client *c = malloc(sizeof(struct client));
-        if (!c)
+        client *cl = malloc(sizeof(client));
+        if (!cl)
                 return EMALLOC;
 
-        strcpy(c->name, name);
-        strcpy(c->email, email);
-        strcpy(c->phone, phone);
-        c->cars = vct();
+        strcpy(cl->name, name);
+        strcpy(cl->email, email);
+        strcpy(cl->phone, phone);
+        cl->cars = vct();
 
-        return vct_push(db->cl, c);
+        return vct_push(db->cl, cl);
 }
 
 /**
@@ -84,18 +75,16 @@ int db_cl_add(const struct database *db, const char *name, const char *email,
  * @retval EOOB If the client doesn't exist in the database.
  * @retval EMALLOC If the new car cannot be allocated.
  */
-int db_car_add(const struct database *db, idx cl, const char *name,
-        const char *plate)
+int db_car_add(const database *db, idx cl, const char *name, const char *plate)
 {
-        if (!db || strlen(name) > NAME_SIZE + 1
-                || strlen(plate) > PLATE_SIZE + 1)
+        if (!db || strlen(name) > NAME_SIZE + 1 || strlen(plate) > PLATE_SIZE + 1)
                 return EINV;
 
-        struct client *client_ = vct_subptr(db->cl, cl);
+        client *client_ = vct_subptr(db->cl, cl);
         if (!client_)
                 return EOOB;
 
-        struct car *c = malloc(sizeof(struct car));
+        car *c = malloc(sizeof(car));
         if (!c)
                 return EMALLOC;
 
@@ -110,27 +99,25 @@ int db_car_add(const struct database *db, idx cl, const char *name,
  * @brief Adds an operation to the database.
  * @param db The pointer to the destination database.
  * @param cl The client's index in the database.
- * @param car The car's index in the database.
+ * @param cr The car's index in the database.
  * @param desc The operation's description.
  * @param price The operation's price.
- * @param date The expiration date (if applicable). Pass to \c NULL to ignore.
- *             Format: 'YYYY:MM:DD HH:MM'
+ * @param date The expiration date (if applicable). Pass to \c NULL to ignore. Format: 'YYYY:MM:DD HH:MM'
  * @retval 0 On success.
  * @retval EINV If \c db is \c NULL or at least 1 string is too large.
  * @retval EOOB If the client or the car doesn't exist in the database.
  * @retval EMALLOC If the new operation cannot be allocated.
  */
-int db_op_add(const struct database *db, idx cl, idx car,
-              const char *desc, double price, const char *date)
+int db_op_add(const database *db, idx cl, idx cr, const char *desc, double price, const char *date)
 {
         if (!db || strlen(desc) > DESC_SIZE)
                 return EINV;
 
-        struct car *car_ = db_car_get(db, cl, car);
+        car *car_ = db_car_get(db, cl, cr);
         if (!car_)
                 return EOOB;
 
-        struct operation *op = malloc(sizeof(struct operation));
+        operation *op = malloc(sizeof(operation));
         if (!op)
                 return EMALLOC;
 
@@ -142,7 +129,6 @@ int db_op_add(const struct database *db, idx cl, idx car,
         else
                 /* Set the first element to 0 to know this is not used. */
                 op->date_exp.y = 0;
-
 
         op->date_cr = date_now();
 
@@ -157,7 +143,7 @@ int db_op_add(const struct database *db, idx cl, idx car,
  * @retval client* On success.
  * @retval NULL On failure.
  */
-struct client *db_cl_get(const struct database *db, idx cl)
+client *db_cl_get(const database *db, idx cl)
 {
         return vct_subptr(db->cl, cl);
 }
@@ -172,9 +158,9 @@ struct client *db_cl_get(const struct database *db, idx cl)
  * @retval car* On success.
  * @retval NULL On failure.
  */
-struct car *db_car_get(const struct database *db, idx cl, idx car)
+car *db_car_get(const database *db, idx cl, idx car)
 {
-        const struct client *client_ = db_cl_get(db, cl);
+        const client *client_ = db_cl_get(db, cl);
         if (!client_)
                 return NULL;
 
@@ -185,15 +171,15 @@ struct car *db_car_get(const struct database *db, idx cl, idx car)
  * @brief Looks for an operation in the database.
  * @param db The pointer to the source database.
  * @param cl The client's index in the database.
- * @param car The car's index in the database.
+ * @param cr The car's index in the database.
  * @param op The operation's index in the database.
  * @return A cast \c vct_subptr() .
  * @retval car* On success.
  * @retval NULL On failure.
  */
-struct operation *db_op_get(const struct database *db, idx cl, idx car, idx op)
+operation *db_op_get(const database *db, idx cl, idx cr, idx op)
 {
-        const struct car *car_ = db_car_get(db, cl, car);
+        const car *car_ = db_car_get(db, cl, cr);
         if (!car_)
                 return NULL;
 
@@ -212,15 +198,12 @@ struct operation *db_op_get(const struct database *db, idx cl, idx car, idx op)
  * @retval EOOB If the client doesn't exist in the database.
  * @note For input formattting see \c db_cl_add() .
  */
-int db_cl_mod(const struct database *db, idx cl, const char *name,
-        const char *email, const char *phone)
+int db_cl_mod(const database *db, idx cl, const char *name, const char *email, const char *phone)
 {
-        if (!db || strlen(name) > NAME_SIZE + 1
-                || strlen(email) > EMAIL_SIZE + 1
-                || strlen(phone) > PHNUM_SIZE + 1)
+        if (!db || strlen(name) > NAME_SIZE + 1 || strlen(email) > EMAIL_SIZE + 1 || strlen(phone) > PHNUM_SIZE + 1)
                 return EINV;
 
-        struct client *client = db_cl_get(db, cl);
+        client *client = db_cl_get(db, cl);
         if (!client)
                 return EOOB;
 
@@ -235,7 +218,7 @@ int db_cl_mod(const struct database *db, idx cl, const char *name,
  * @brief Looks for and modifies a car in the database.
  * @param db The pointer to the source database.
  * @param cl The client's index in the database.
- * @param car The car's index in the database.
+ * @param cr The car's index in the database.
  * @param name The car's new name.
  * @param plate The car's new plate number.
  * @retval 0 On success.
@@ -243,14 +226,13 @@ int db_cl_mod(const struct database *db, idx cl, const char *name,
  * @retval EOOB If the client or the car doesn't exist in the database.
  * @note For input formattting see \c db_car_add() .
  */
-int db_car_mod(const struct database *db, idx cl, idx car, const char *name,
+int db_car_mod(const database *db, idx cl, idx cr, const char *name,
         const char *plate)
 {
-        if (!db || strlen(name) > NAME_SIZE + 1
-                || strlen(plate) > PLATE_SIZE + 1)
+        if (!db || strlen(name) > NAME_SIZE + 1 || strlen(plate) > PLATE_SIZE + 1)
                 return EINV;
 
-        struct car *car_ = db_car_get(db, cl, car);
+        car *car_ = db_car_get(db, cl, cr);
         if (!car_)
                 return EOOB;
 
@@ -274,13 +256,13 @@ int db_car_mod(const struct database *db, idx cl, idx car, const char *name,
  * @retval EOOB If the client/car/operation doesn't exist in the database.
  * @note For input formattting see \c db_op_add() .
  */
-int db_op_mod(const struct database *db, idx cl, idx car, idx op,
+int db_op_mod(const database *db, idx cl, idx car, idx op,
         const char *desc, double price, const char *date)
 {
         if (!db || strlen(desc) > NAME_SIZE + 1)
                 return EINV;
 
-        struct operation *op_ = db_op_get(db, cl, car, op);
+        operation *op_ = db_op_get(db, cl, car, op);
         if (!op_)
                 return EOOB;
 
@@ -303,9 +285,9 @@ int db_op_mod(const struct database *db, idx cl, idx car, idx op,
  * @retval 0 On success.
  * @retval EOOB If the client doesn't exist.
  */
-int db_cl_rm(const struct database *db, idx cl)
+int db_cl_rm(const database *db, idx cl)
 {
-        struct client *client = db_cl_get(db, cl);
+        client *client = db_cl_get(db, cl);
         if (!client)
                 return EOOB;
 
@@ -322,35 +304,35 @@ int db_cl_rm(const struct database *db, idx cl)
  * @brief Removes a car from the database.
  * @param db The pointer to the source database.
  * @param cl The client's index in the database.
- * @param car The car's index in the database.
+ * @param cr The car's index in the database.
  * @return \c obj_car_rm() with the proper paramaters.
  * @retval 0 On success.
  * @retval EOOB If the client or the car doesn't exist.
  */
-int db_car_rm(const struct database *db, idx cl, idx car)
+int db_car_rm(const database *db, idx cl, idx cr)
 {
-        struct client *client = db_cl_get(db, cl);
-        struct car *car_ = db_car_get(db, cl, car);
+        client *client = db_cl_get(db, cl);
+        car *car_ = db_car_get(db, cl, cr);
         if (!client || !car_)
                 return EOOB;
 
         vct_del(car_->operations);
-        return vct_rm(client->cars, car);
+        return vct_rm(client->cars, cr);
 }
 
 /**
  * @brief Removes an operation from the database.
  * @param db The pointer to the source database.
  * @param cl The client's index in the database.
- * @param car The car's index in the database.
+ * @param cr The car's index in the database.
  * @param op The operation's index in the database.
  * @return \c obj_op_rm() with the proper paramaters.
  * @retval 0 On success.
  * @retval EOOB If the car doesn't exist.
  */
-int db_op_rm(const struct database *db, idx cl, idx car, idx op)
+int db_op_rm(const database *db, idx cl, idx cr, idx op)
 {
-        struct car *car_ = db_car_get(db, cl, car);
+        car *car_ = db_car_get(db, cl, cr);
         if (!car_)
                 return EOOB;
 
@@ -363,7 +345,7 @@ int db_op_rm(const struct database *db, idx cl, idx car, idx op)
  * @retval 0 On success
  * @retval EINV If \c db is \c NULL .
  */
-int db_del(struct database *db)
+int db_del(database *db)
 {
         if (!db)
                 return EINV;

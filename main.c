@@ -1,9 +1,8 @@
 /**
  * @file main.c
  * @brief Program entry.
- * @note This file is \b the \b most \b important, since it's the main function.
- *       In reality, it contains nearly \c 0 information about how the program
- *       works. Visit the individual module documentation for more info.
+ * @note This file is \b the \b most \b important, since it has the the main function. In reality, it contains nearly
+ *       \c 0 information about how the program works. Visit the individual module documentation for more info.
  */
 
 #include <stdio.h>
@@ -13,13 +12,12 @@
 #include "module-filehandler/include/fh.h"
 
 /**
- * @brief Cleans up the allocated memory and exits the program with an error
- *        code.
+ * @brief Cleans up the allocated memory and exits the program with the given error code.
  * @param db Pointer the main database.
  * @param err_code Error code sent to the operating system.
  * @note File closing is handled by the filehandler module.
  */
-void err_cleanup(struct database *db, int err_code)
+void err_cleanup(database *db, int err_code)
 {
         fprintf(stderr, "Takaritas es kilepes...\n");
         db_del(db);
@@ -32,7 +30,7 @@ void err_cleanup(struct database *db, int err_code)
  * @param db Pointer to the database that will be passed to function.
  * @return \c 0 if there were no errors, non-zero if there was an error.
  */
-int errh_call(int (*function)(struct database *), struct database *db)
+int errh_call(int (*function)(database *), database *db)
 {
         int error_code = function(db);
 
@@ -72,7 +70,7 @@ int errh_call(int (*function)(struct database *), struct database *db)
 int main(void)
 {
         setbuf(stdout, NULL);
-        struct database *db = db_init("(nincs nev)", "(nincs leiras)\n");
+        database *db = db_init("(nincs nev)", "(nincs leiras)\n");
         if (!db) {
                 fprintf(stderr, "\nNem lehet letrehozni az adatbazist.\n");
                 return EMALLOC;

@@ -5,12 +5,12 @@
 
 #include "include/intf.h"
 
-void intf_db_namechange(struct database *db);
+void intf_db_namechange(database *db);
 
 /**
  * @brief Prints the main menu's text to \c stdout .
  */
-void intf_main_txt(struct database *db)
+void intf_main_txt(database *db)
 {
         puts("--------------------- repairshop ---------------------");
         printf("Adatbazis: %s | %s\n", db->name, db->desc);
@@ -29,7 +29,7 @@ void intf_main_txt(struct database *db)
  * @retval 0 If the user requests the program to exit.
  * @retval EMALLOC If a memory allocation failure is occured.
  */
-int intf_main(struct database *db)
+int intf_main(database *db)
 {
         bool menu_active = true;
         while (menu_active) {
@@ -66,19 +66,18 @@ int intf_main(struct database *db)
 /**
  * @brief Changes the name and description of an already initialized database.
  * @param db Pointer to the source database.
- * @return -
  */
-void intf_db_namechange(struct database *db)
+void intf_db_namechange(database *db)
 {
-        char db_n[NAME_SIZE + 1] = "\0";
-        char db_d[DESC_SIZE + 1] = "\0";
+        char name[NAME_SIZE + 1] = "\0";
+        char desc[DESC_SIZE + 1] = "\0";
 
-        printf("Adatbazis neve (max. %d karakter): ", NAME_SIZE);
-        intf_io_fgets(db_n, NAME_SIZE + 1);
+        printf("Adatbazis neve (max. %d karakter, formatum: nincs): ", NAME_SIZE);
+        intf_io_fgets(name, NAME_SIZE + 1);
 
-        printf("Adatbazis leirasa (max %d karakter: ", DESC_SIZE);
-        intf_io_fgets(db_d, DESC_SIZE + 1);
+        printf("Adatbazis leirasa (max %d karakter, formatum: nincs): ", DESC_SIZE);
+        intf_io_fgets(desc, DESC_SIZE + 1);
 
-        strcpy(db->name, db_n);
-        strcpy(db->desc, db_d);
+        strcpy(db->name, name);
+        strcpy(db->desc, desc);
 }

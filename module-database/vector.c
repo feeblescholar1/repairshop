@@ -1,15 +1,10 @@
 /**
  * @file vector.c
  * @brief Generic vector implementation.
- * @details A vector implementation to manage an array of pointers. The managed
- *          data can point to anything, that is why \c void** is used. The type
- *          can also be different, however all data must be preallocated and
- *          properly cast by the caller. Deallocation (to some extent) is
- *          handled by the implementation, more specifically if the data inside
- *          is not itself is dynamically allocated.\n
- *          (e.g.: If there are nested vectors, the implementation doesn't know
- *          that, so it cannot free it. Freeing that is the caller's
- *          reponsibility.)
+ * @details A vector implementation to manage an array of pointers. The managed data can point to anything, that is why
+ *          \c void** is used. The type can also be different, however all data must be preallocated and properly cast
+ *          by the caller. Deallocation (to some extent) is handled by the implementation, more specifically if the data
+ *          inside is not dynamically allocated.\n
  */
 
 #include "include/vector.h"
@@ -19,10 +14,9 @@
  * @warning Does not initialize \c vector->items.
  * @return A struct vector* on success and \c EMEMNULL on failure.
  */
-struct vector *vct(void)
+vector *vct(void)
 {
-        struct vector *new = malloc(sizeof(struct vector));
-
+        vector *new = malloc(sizeof(vector));
         if (!new)
                 return EMEMNULL;
 
@@ -41,7 +35,7 @@ struct vector *vct(void)
  * @retval EREALLOC If the vector expansion fails.
  * @note Use to function to initialize \c v->items.
  */
-int vct_push(struct vector *v, void *data)
+int vct_push(vector *v, void *data)
 {
         if (!v || !data)
                 return EINV;
@@ -49,16 +43,16 @@ int vct_push(struct vector *v, void *data)
         /* vec->items is NULL, we have to allocate it */
         if (v->size == 0) {
                 v->items = malloc(sizeof(void*));
-                if (!v->items) {
+                if (!v->items)
                         return EMALLOC;
-                }
+
                 v->items[0] = data;
                 v->size++;
                 return 0;
         }
 
         void **tmp = realloc(v->items, (v->size + 1) * sizeof(void*));
-        if (tmp == NULL)
+        if (!tmp)
                 return EREALLOC;
 
         v->items = tmp;
@@ -73,9 +67,9 @@ int vct_push(struct vector *v, void *data)
  * @param pos The position to be checked.
  * @return \c true if it's inbounds, \c false if not.
  */
-inline bool inbounds(const struct vector *v, idx pos)
+inline bool inbounds(const vector *v, idx pos)
 {
-        return (pos < v->size);
+        return pos < v->size;
 }
 
 /**
@@ -91,7 +85,7 @@ inline bool inbounds(const struct vector *v, idx pos)
  * @retval EREALLOC If the vector expansion fails.
  * @note Indexing starts from \c 0.
  */
-int vct_insert(struct vector *v, void *data, idx pos)
+int vct_insert(vector *v, void *data, idx pos)
 {
         if (!v || !data)
                 return EINV;
@@ -126,41 +120,12 @@ int vct_insert(struct vector *v, void *data, idx pos)
  * @retval NULL On failure.
  * @note The given pointer must not be freed. Use \c vct_rm() for that.
  */
-void *vct_subptr(const struct vector *v, idx pos)
+void *vct_subptr(const vector *v, idx pos)
 {
         if (!inbounds(v, pos))
                 return NULL;
 
         return v->items[pos];
-}
-
-/**
- * @brief Frees and removes the last memory block pointer from a vector.
- * @param v Pointer to the source vector.
- * @retval 0 On success.
- * @retval EINV If \c v is \c NULL
- * @return EREALLOC If the vector shrinking fails.
- */
-int vct_pop(struct vector *v)
-{
-        if (!v)
-                return EINV;
-
-        free(v->items[v->size - 1]);
-        v->size--;
-
-        /* no items left, free the pointer array. */
-        if (v->size == 0) {
-                free(v->items);
-                return 0;
-        }
-
-        void **tmp = realloc(v->items, (v->size + 1) * sizeof(void*));
-        if (!tmp)
-                return EREALLOC;
-
-        v->items = tmp;
-        return 0;
 }
 
 /**
@@ -172,7 +137,7 @@ int vct_pop(struct vector *v)
  * @retval EOOB If \c pos is out of range.
  * @retval REALLOC If the vector shrinking fails.
  */
-int vct_rm(struct vector *v, idx pos)
+int vct_rm(vector *v, idx pos)
 {
         if (!v)
                 return EINV;
@@ -208,7 +173,7 @@ int vct_rm(struct vector *v, idx pos)
  * @retval 0 On success.
  * @retval EINV If \c v is \c NULL.
  */
-int vct_del(struct vector *v)
+int vct_del(vector *v)
 {
         if (!v)
                 return EINV;
@@ -230,5 +195,7 @@ int vct_del(struct vector *v)
         free(v->items[0]);
         free(v->items);
         free(v);
+        /* To avoid calling this function twice set v to NULL. */
+        v = NULL;
         return 0;
 }

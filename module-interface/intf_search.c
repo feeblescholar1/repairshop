@@ -4,11 +4,10 @@
  * @brief Prints the search menu's text and the last search's result to \c stdout .
  * @param db The source database pointer.
  * @param res Pointer to last search result.
- * @param depth Determines how many database indexes \c res->map->items contains
- *              per index.
+ * @param depth Determines how many database indexes \c res->map->items contains per index.
  * @return  -
  */
-void intf_search_txt(struct database *db, struct sres *res, int depth)
+void intf_search_txt(database *db, sres *res, int depth)
 {
         puts("----------------------- Kereses ----------------------");
         puts("[0] Vissza");
@@ -33,25 +32,23 @@ void intf_search_txt(struct database *db, struct sres *res, int depth)
         for (idx i = 0; i < res->map->size; i++) {
                 idx *db_idx = vct_subptr(res->map, i);
 
-                struct client *cl = db_cl_get(db, db_idx[0]);
-                printf("[%zu][%s][%s][%s]\n", db_idx[0], cl->name, cl->email,
-                cl->phone);
+                client *cl = db_cl_get(db, db_idx[0]);
+                printf("[%zu][%s][%s][%s]\n", db_idx[0], cl->name, cl->email, cl->phone);
 
                 if (depth > 1) {
-                        struct car *car = db_car_get(db, *db_idx, db_idx[1]);
+                        car *car = db_car_get(db, *db_idx, db_idx[1]);
                         printf("\t[%zu][%s][%s]\n", db_idx[1], car->name, car->plate);
 
                         if (depth > 2) {
-                                struct operation *op = db_op_get(db, db_idx[0],
-                                                        db_idx[1], db_idx[2]);
+                                operation *op = db_op_get(db, db_idx[0], db_idx[1], db_idx[2]);
 
                                 char date_cr[17] = "\0";
                                 char date_exp[17] = "\0";
                                 date_printf(&op->date_cr, date_cr);
                                 date_printf(&op->date_exp, date_exp);
 
-                                printf("\t\t[%zu][%s][%lf][%s]->[%s]\n", db_idx[2], op->desc,
-                                        op->price, date_cr, date_exp);
+                                printf("\t\t[%zu][%s][%lf][%s]->[%s]\n", db_idx[2], op->desc, op->price, date_cr,
+                                        date_exp);
                         }
                 }
         }
@@ -67,23 +64,23 @@ void intf_search_txt(struct database *db, struct sres *res, int depth)
  * @retval 0 If the user requests to go back.
  * @retval EMALLOC If a memory allocation failure is occured.
  */
-int intf_search(struct database *db)
+int intf_search(database *db)
 {
-        bool submenu_active = true;
-        struct sres result = {.map = NULL, .err = 0};
+        bool active = true;
+        sres result = {.map = NULL, .err = 0};
         int depth = 0;
 
-        while (submenu_active) {
+        while (active) {
                 if (result.err == EMALLOC)
                         return EMALLOC;
 
                 intf_search_txt(db, &result, depth);
-                int opt = intf_io_opt();
-                int resp;
+                int s = intf_io_opt();
+                int retval = 0;
 
-                switch (opt) {
+                switch (s) {
                         case 0:
-                                submenu_active = false;
+                                active = false;
                                 if (result.map)
                                         vct_del(result.map);
                                 break;
@@ -102,27 +99,27 @@ int intf_search(struct database *db)
                         case 3:
                                 if (result.map)
                                         vct_del(result.map);
-                                result = intf_search_exp(db);
+                                result = search_expiration(db);
                                 depth = 3;
                                 break;
                         case 4:
-                                resp = intf_cl(db);
-                                if (resp == EMALLOC)
-                                        return EMALLOC;
+                                retval = intf_cl(db);
                                 break;
                         case 5:
                                 printf("Ugyfelazonosito (nem kell talalatnak lennie): ");
-                                opt = intf_io_opt();
-                                resp = intf_car(db, opt);
-                                if (resp == EOOB)
-                                        puts("Az ugyfel nem talalhato.");
-                                else if (resp == EMALLOC)
-                                        return EMALLOC;
+                                s = intf_io_opt();
+                                retval = intf_car(db, s);
                                 break;
                         default:
                                 puts("Nincs ilyen opcio.");
                                 break;
                 }
+
+                if (retval == EOOB)
+                        puts("Az ugyfel nem talalhato.");
+
+                if (retval == EMALLOC)
+                        return EMALLOC;
         }
 
         return 0;
@@ -133,7 +130,7 @@ int intf_search(struct database *db)
  * @param db The database pointer which the user will search in.
  * @return A search result structure with corresponding database indexes.
  */
-struct sres intf_search_cl(struct database *db)
+sres intf_search_cl(database *db)
 {
         /* Ask for the term */
         printf("Ugyfel neve (max. %d karakter): ", NAME_SIZE);
@@ -148,7 +145,7 @@ struct sres intf_search_cl(struct database *db)
  * @param db The database pointer which the user will search in.
  * @return A search result structure with corresponding database indexes.
  */
-struct sres intf_search_plate(struct database *db)
+sres intf_search_plate(database *db)
 {
         /* Ask for the term */
         printf("Rendszam (max. %d karakter): ", PLATE_SIZE);
@@ -156,14 +153,4 @@ struct sres intf_search_plate(struct database *db)
         intf_io_fgets(term, PLATE_SIZE + 1);
 
         return search_plate(db, term);
-}
-
-/**
- * Frontend for listing operation expiration.
- * @param db The database pointer which the user will search in.
- * @return A search result structure with corresponding database indexes.
- */
-struct sres intf_search_exp(struct database *db)
-{
-        return search_expiration(db);
 }

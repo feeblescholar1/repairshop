@@ -1,7 +1,6 @@
 /**
  * @file fh.h
- * @brief Module header file. Include this file to be able store databases in a
- *        file.
+ * @brief Module header file. Include this file to be able store databases in a file.
  */
 
 #ifndef REPAIRSHOP_FH_EXPORT_H
@@ -16,7 +15,7 @@
 /** A constant for the \c read_buffer maximum. */
 #define LONGEST_VALID_LINE (NAME_SIZE + EMAIL_SIZE + PHNUM_SIZE + FORMAT_RQ)
 
-int fh_import(struct database *dst);
-int fh_export(struct database *db);
+int fh_import(database *dst);
+int fh_export(database *db);
 
 #endif //REPAIRSHOP_FH_EXPORT_H
