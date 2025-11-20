@@ -14,7 +14,7 @@
  * @brief A structure for containing search results.
  */
 typedef struct sres {
-        vector *map;      /**< Stores the database indexes */
+        vector *map;            /**< Stores the database indexes */
         int err;                /**<  Error code */
 } sres;
 

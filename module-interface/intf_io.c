@@ -12,14 +12,25 @@
  */
 void intf_io_fgets(char *buffer, size_t size)
 {
-        fgets(buffer, size, stdin);
+        do {
+                fgets(buffer, size, stdin);
 
-        if (strcspn(buffer, "\r\n") == size - 1) {
-                int c;
-                while ((c = getchar()) != '\n' && c != EOF);
+                if (strcspn(buffer, "\r\n") == size - 1) {
+                        int c;
+                        while ((c = getchar()) != '\n' && c != EOF);
+                }
+
+                size_t real_end = strcspn(buffer, "\r\n");
+                buffer[real_end] = '\0';
+
+                if (strcspn(buffer, "|") != real_end) {
+                        puts("A pipe karakter ( | ) foglalt. Kerlek probald ujra.");
+                        continue;
+                }
+
+                break;
         }
-
-        buffer[strcspn(buffer, "\r\n")] = '\0';
+        while (true);
 }
 
 /**

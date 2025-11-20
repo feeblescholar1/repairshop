@@ -64,8 +64,7 @@ int errh_call(int (*function)(database *), database *db)
 }
 
 /**
- * @brief The (fake) program entry. We all know that the program starts at
- *        the label \c _start . Documented for completeness’ sake.
+ * @brief The (fake) program entry. We all know that the program starts at the label \c _start .
  */
 int main(void)
 {

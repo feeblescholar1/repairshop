@@ -226,8 +226,7 @@ int db_cl_mod(const database *db, idx cl, const char *name, const char *email, c
  * @retval EOOB If the client or the car doesn't exist in the database.
  * @note For input formattting see \c db_car_add() .
  */
-int db_car_mod(const database *db, idx cl, idx cr, const char *name,
-        const char *plate)
+int db_car_mod(const database *db, idx cl, idx cr, const char *name, const char *plate)
 {
         if (!db || strlen(name) > NAME_SIZE + 1 || strlen(plate) > PLATE_SIZE + 1)
                 return EINV;
@@ -256,8 +255,7 @@ int db_car_mod(const database *db, idx cl, idx cr, const char *name,
  * @retval EOOB If the client/car/operation doesn't exist in the database.
  * @note For input formattting see \c db_op_add() .
  */
-int db_op_mod(const database *db, idx cl, idx car, idx op,
-        const char *desc, double price, const char *date)
+int db_op_mod(const database *db, idx cl, idx car, idx op, const char *desc, double price, const char *date)
 {
         if (!db || strlen(desc) > NAME_SIZE + 1)
                 return EINV;

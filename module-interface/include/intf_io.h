@@ -8,6 +8,7 @@
 
 #include <string.h>
 #include <stdio.h>
+#include <stdbool.h>
 
 /**
  * A general buffer size, must not be lower than 32 to avoid breaking
