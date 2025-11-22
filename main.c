@@ -44,10 +44,6 @@ int errh_call(int (*function)(database *), database *db)
 
                         err_cleanup(db, error_code);
                         break;
-                case EFPERM:
-                        fprintf(stderr, "\nA faljt nem lehet megnyitni.\n");
-                        err_cleanup(db, error_code);
-                        break;
                 case EINV:
                         /*
                          * Only fh_import() will return EINV. (as of now)
